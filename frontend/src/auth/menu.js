@@ -8,31 +8,9 @@ const MENU = {
         "profile",
     ],
     team_lead: ["dashboard", "intern-tasks", "reviews", "meetings", "chat"],
-    manager: [
-        { path: "dashboard", label: "Dashboard" },
-        { path: "analytics", label: "Analytics" },
-        { path: "reports", label: "Reports" },
-        { path: "meetings", label: "Meetings" },
-        { path: "chat", label: "Chat" },
-    ],
+    manager: ["dashboard", "analytics", "reports", "meetings", "chat"],
     admin: ["dashboard", "users", "settings"],
-    cto: [
-        "dashboard",
-        "organization",
-        "analytics",
-        "reports",
-        "chat",
-        "settings",
-    ],
-    cfo: [
-        "dashboard",
-        "organization",
-        "analytics",
-        "reports",
-        "chat",
-        "settings",
-    ],
-    coo: [
+    cxo: [
         "dashboard",
         "organization",
         "analytics",

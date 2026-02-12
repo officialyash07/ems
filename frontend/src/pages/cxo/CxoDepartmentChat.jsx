@@ -55,7 +55,7 @@ const initialMessages = {
         },
     ],
 };
-const CeoOrganizationChat = () => {
+const CxoDepartmentChat = () => {
     const [activeUser, setActiveUser] = useState(people.managers[0]);
     const [messages, setMessages] = useState(initialMessages);
     const [input, setInput] = useState("");
@@ -226,4 +226,4 @@ const CeoOrganizationChat = () => {
     );
 };
 
-export default CeoOrganizationChat;
+export default CxoDepartmentChat;
