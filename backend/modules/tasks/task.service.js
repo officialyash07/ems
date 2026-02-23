@@ -1,4 +1,5 @@
-const prisma = require('../../config/prisma');
+const Task = require('../../models/Task');
+const TaskVersion = require('../../models/TaskVersion');
 
 // CREATE TASK
 exports.createTask = async (data) => {
@@ -25,17 +26,13 @@ exports.createTask = async (data) => {
   if (isNaN(d)) throw new Error('Invalid dueDate');
   safeData.dueDate = d;
 
-  return prisma.task.create({ data: safeData });
+  return Task.create(safeData);
 };
 
 // GET TASKS
 exports.getTasks = async () => {
   try {
-    const tasks = await prisma.task.findMany({
-      include: {
-        submissions: true
-      }
-    });
+    const tasks = await Task.find().lean();
     return tasks || [];
   } catch (error) {
     console.error('Error fetching tasks:', error);
@@ -45,16 +42,12 @@ exports.getTasks = async () => {
 
 // GET TASK BY ID
 exports.getTaskById = async (id) => {
-  const task = await prisma.task.findUnique({
-    where: { id },
-    include: {
-      submissions: true,
-      versions: true,
-      assignedTo: true,
-      assignedBy: true,
-      department: true
-    }
-  });
+  const task = await Task.findById(id)
+    .populate('versions')
+    .populate('assignedTo')
+    .populate('assignedBy')
+    .populate('department')
+    .lean();
 
   if (!task) {
     throw new Error('Task not found');
@@ -66,24 +59,20 @@ exports.getTaskById = async (id) => {
 // UPDATE TASK WITH VERSION TRACKING
 exports.updateTask = async (id, data) => {
 
-  const existingTask = await prisma.task.findUnique({
-    where: { id }
-  });
+  const existingTask = await Task.findById(id);
 
   if (!existingTask) {
     throw new Error("Task not found");
   }
 
   // Save old version
-  await prisma.taskVersion.create({
-    data: {
-      taskId: existingTask.id,
-      versionNo: existingTask.versionNo,
-      title: existingTask.title,
-      description: existingTask.description,
-      dueDate: existingTask.dueDate,
-      changedById: data.changedById || "system"
-    }
+  await TaskVersion.create({
+    taskId: existingTask._id,
+    versionNo: existingTask.versionNo,
+    title: existingTask.title,
+    description: existingTask.description,
+    dueDate: existingTask.dueDate,
+    changedById: data.changedById || "system"
   });
 
   // Prepare safe update object
@@ -113,44 +102,32 @@ exports.updateTask = async (id, data) => {
     updateData.status = data.status;
   }
 
-  return prisma.task.update({
-    where: { id },
-    data: updateData
-  });
+  return Task.findByIdAndUpdate(id, updateData, { new: true });
 };
 
 // GET TASK VERSIONS
 exports.getTaskVersions = async (taskId) => {
-  const task = await prisma.task.findUnique({
-    where: { id: taskId }
-  });
+  const task = await Task.findById(taskId);
 
   if (!task) {
     throw new Error('Task not found');
   }
 
-  return prisma.taskVersion.findMany({
-    where: { taskId },
-    include: {
-      changedBy: true
-    },
-    orderBy: { createdAt: 'desc' }
-  });
+  return TaskVersion.find({ taskId })
+    .populate('changedBy')
+    .sort({ createdAt: -1 })
+    .lean();
 };
 
 // DELETE TASK
 exports.deleteTask = async (id) => {
-  const task = await prisma.task.findUnique({
-    where: { id }
-  });
+  const task = await Task.findById(id);
 
   if (!task) {
     throw new Error('Task not found');
   }
 
-  return prisma.task.delete({
-    where: { id }
-  });
+  return Task.findByIdAndDelete(id);
 };
 
 // ASSIGN TASK (Only Team Lead can assign)
@@ -160,35 +137,31 @@ exports.assignTask = async (taskId, assignedToId, assignedById, userRole) => {
     throw new Error('Only Team Lead can assign tasks');
   }
 
-  const task = await prisma.task.findUnique({
-    where: { id: taskId }
-  });
+  const task = await Task.findById(taskId);
 
   if (!task) {
     throw new Error('Task not found');
   }
 
   // Save old version
-  await prisma.taskVersion.create({
-    data: {
-      taskId: task.id,
-      versionNo: task.versionNo,
-      title: task.title,
-      description: task.description,
-      dueDate: task.dueDate,
-      changedById: assignedById
-    }
+  await TaskVersion.create({
+    taskId: task._id,
+    versionNo: task.versionNo,
+    title: task.title,
+    description: task.description,
+    dueDate: task.dueDate,
+    changedById: assignedById
   });
 
-  return prisma.task.update({
-    where: { id: taskId },
-    data: {
+  return Task.findByIdAndUpdate(
+    taskId,
+    {
       assignedToId,
       versionNo: task.versionNo + 1
     },
-    include: {
-      assignedTo: true,
-      assignedBy: true
-    }
-  });
+    { new: true }
+  )
+    .populate('assignedTo')
+    .populate('assignedBy');
 };
+

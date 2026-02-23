@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const submissionsController = require('./submissions.controller');
 const upload = require('../../config/multer');
+const { authenticate } = require('../../middlewares/auth.middleware');
+const { authorizePermission } = require('../../middlewares/role.middleware');
 
 // Middleware to handle multer errors
 const handleMulterError = (err, req, res, next) => {
@@ -12,7 +14,9 @@ const handleMulterError = (err, req, res, next) => {
   next();
 };
 
-router.post('/', (req, res, next) => {
+router.use(authenticate);
+
+router.post('/', authorizePermission('submission.create'), (req, res, next) => {
   console.log('[POST /] Incoming submission request');
   upload.single('file')(req, res, (err) => {
     if (err) {
@@ -20,14 +24,14 @@ router.post('/', (req, res, next) => {
       return res.status(400).json({ error: `Upload error: ${err.message}` });
     }
     console.log('[multer] File processed, calling controller');
-    submissionsController.create(req, res);
+    return submissionsController.create(req, res);
   });
 });
 
-router.get('/task/:taskId', submissionsController.getByTask);
-router.get('/:id', submissionsController.getSubmissionById);
-router.get('/task/:taskId/user/:submittedById', submissionsController.getSubmissionHistory);
-router.patch('/:id/review', submissionsController.review);
-router.delete('/:id', submissionsController.deleteSubmission);
+router.get('/task/:taskId', authorizePermission('submission.read'), submissionsController.getByTask);
+router.get('/:id', authorizePermission('submission.read'), submissionsController.getSubmissionById);
+router.get('/task/:taskId/user/:submittedById', authorizePermission('submission.read'), submissionsController.getSubmissionHistory);
+router.patch('/:id/review', authorizePermission('submission.review'), submissionsController.review);
+router.delete('/:id', authorizePermission('submission.delete'), submissionsController.deleteSubmission);
 
 module.exports = router;

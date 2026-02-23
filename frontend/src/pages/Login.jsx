@@ -4,11 +4,16 @@ import { useState } from "react";
 
 import { mockUsers } from "../auth/mockUsers";
 import { login } from "../redux/authSlice";
+import { authApi } from "../utils/api";
 
 import { Eye, EyeOff, ArrowRight } from "lucide-react";
 
 const Login = () => {
     const [showPassword, setShowPassword] = useState(false);
+    const [email, setEmail] = useState("admin@owms.com");
+    const [password, setPassword] = useState("password123");
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
 
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -16,6 +21,22 @@ const Login = () => {
     const handleLogin = (user) => {
         dispatch(login(user));
         navigate(`/${user.role}/dashboard`);
+    };
+
+    const handleSignIn = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setError(null);
+
+        try {
+            const response = await authApi.login({ email, password });
+            dispatch(login(response));
+            navigate(`/${response.user.role}/dashboard`);
+        } catch (err) {
+            setError(err.message || "Login failed. Please check your credentials.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -29,8 +50,15 @@ const Login = () => {
                     Sign in to access your dashboard
                 </p>
 
+                {/* Error Message */}
+                {error && (
+                    <div className="mt-4 p-3 rounded-lg bg-red-50 border border-red-200">
+                        <p className="text-sm text-red-700">{error}</p>
+                    </div>
+                )}
+
                 {/* Form */}
-                <div className="mt-6 space-y-5">
+                <form onSubmit={handleSignIn} className="mt-6 space-y-5">
                     {/* Email */}
                     <div>
                         <label className="block text-sm font-medium text-slate-700">
@@ -38,8 +66,11 @@ const Login = () => {
                         </label>
                         <input
                             type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
                             placeholder="you@company.com"
                             className="mt-1 w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+                            required
                         />
                     </div>
 
@@ -51,8 +82,11 @@ const Login = () => {
                         <div className="relative mt-1">
                             <input
                                 type={showPassword ? "text" : "password"}
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
                                 placeholder="••••••••"
                                 className="w-full rounded-lg border border-slate-300 px-4 py-2.5 pr-10 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+                                required
                             />
                             <button
                                 type="button"
@@ -69,19 +103,14 @@ const Login = () => {
                     </div>
 
                     {/* Sign in */}
-                    <button className="flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 transition cursor-pointer">
-                        Sign in <ArrowRight size={16} />
+                    <button 
+                        type="submit"
+                        disabled={loading}
+                        className="flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 transition cursor-pointer disabled:bg-indigo-400 disabled:cursor-not-allowed"
+                    >
+                        {loading ? "Signing in..." : "Sign in"} {!loading && <ArrowRight size={16} />}
                     </button>
-                </div>
-
-                {/* Divider */}
-                <div className="my-6 flex items-center gap-3">
-                    <div className="h-px flex-1 bg-slate-200" />
-                    <span className="text-xs font-medium text-slate-400">
-                        DEMO ACCOUNTS
-                    </span>
-                    <div className="h-px flex-1 bg-slate-200" />
-                </div>
+                </form>
 
                 {/* Demo buttons */}
                 <div className="grid grid-cols-2 gap-3">

@@ -41,7 +41,9 @@ app.use('/uploads', (req, res, next) => {
 
 const taskRoutes = require('./modules/tasks/task.routes');
 const submissionsRoutes = require('./modules/submissions/submissions.routes');
+const authRoutes = require('./modules/auth/auth.routes');
 
+app.use('/api/auth', authRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/submissions', submissionsRoutes);
 

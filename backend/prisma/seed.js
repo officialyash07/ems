@@ -1,73 +1,69 @@
-const { PrismaClient } = require('@prisma/client');
-
-const prisma = new PrismaClient();
+const { connectDB, disconnectDB } = require('../config/db');
+const bcrypt = require('bcryptjs');
+const User = require('../models/User');
+const Department = require('../models/Department');
+const Task = require('../models/Task');
 
 async function main() {
+  await connectDB();
   console.log('🌱 Seeding database...');
+  
+  // Clear existing data
+  await User.deleteMany({});
+  await Department.deleteMany({});
+  await Task.deleteMany({});
+
+  const defaultPassword = 'password123';
+  const hashedPassword = await bcrypt.hash(defaultPassword, 10);
 
   // Create admin user
-  const admin = await prisma.user.create({
-    data: {
-      id: 'admin-1',
-      email: 'admin@owms.com',
-      name: 'Admin User',
-      role: 'admin',
-    },
+  const admin = await User.create({
+    email: 'admin@owms.com',
+    name: 'Admin User',
+    role: 'admin',
+    password: hashedPassword,
   });
   console.log('✓ Created admin user:', admin.email);
 
   // Create department
-  const dept = await prisma.department.create({
-    data: {
-      id: 'dept-engineering',
-      name: 'Engineering',
-      userId: admin.id,
-    },
+  const dept = await Department.create({
+    name: 'Engineering',
+    userId: admin._id,
   });
   console.log('✓ Created department:', dept.name);
 
   // Create intern users
-  const interns = await Promise.all([
-    prisma.user.create({
-      data: {
-        id: 'intern-1',
-        email: 'sarah.jones@owms.com',
-        name: 'Sarah Jones',
-        role: 'intern',
-      },
-    }),
-    prisma.user.create({
-      data: {
-        id: 'intern-2',
-        email: 'david.lee@owms.com',
-        name: 'David Lee',
-        role: 'intern',
-      },
-    }),
-    prisma.user.create({
-      data: {
-        id: 'intern-3',
-        email: 'emily.chen@owms.com',
-        name: 'Emily Chen',
-        role: 'intern',
-      },
-    }),
-    prisma.user.create({
-      data: {
-        id: 'intern-4',
-        email: 'michael.brown@owms.com',
-        name: 'Michael Brown',
-        role: 'intern',
-      },
-    }),
-    prisma.user.create({
-      data: {
-        id: 'intern-5',
-        email: 'jessica.wilson@owms.com',
-        name: 'Jessica Wilson',
-        role: 'intern',
-      },
-    }),
+  const interns = await User.insertMany([
+    {
+      email: 'sarah.jones@owms.com',
+      name: 'Sarah Jones',
+      role: 'intern',
+      password: hashedPassword,
+    },
+    {
+      email: 'david.lee@owms.com',
+      name: 'David Lee',
+      role: 'intern',
+      password: hashedPassword,
+    },
+    {
+      email: 'emily.chen@owms.com',
+      name: 'Emily Chen',
+      role: 'intern',
+      password: hashedPassword,
+    },
+    {
+      email: 'michael.brown@owms.com',
+      name: 'Michael Brown',
+      role: 'intern',
+      password: hashedPassword,
+    },
+    {
+      email: 'jessica.wilson@owms.com',
+      name: 'Jessica Wilson',
+      role: 'intern',
+      password: hashedPassword,
+    },
   ]);
 
   console.log('✓ Created', interns.length, 'intern users');
@@ -78,9 +74,9 @@ async function main() {
     {
       title: 'Research Q4 Market Trends',
       description: 'Analyze and document Q4 market trends for the engineering department',
-      departmentId: dept.id,
-      assignedToId: interns[0].id,
-      assignedById: admin.id,
+      departmentId: dept._id,
+      assignedToId: interns[0]._id,
+      assignedById: admin._id,
       dueDate: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
       priority: 'high',
       status: 'pending',
@@ -88,20 +84,16 @@ async function main() {
     {
       title: 'Develop API Integration Draft',
       description: 'Create a draft for the new API integration module',
-      departmentId: dept.id,
-      assignedToId: interns[1].id,
-      assignedById: admin.id,
+      departmentId: dept._id,
+      assignedToId: interns[1]._id,
+      assignedById: admin._id,
       dueDate: new Date(now.getTime() + 10 * 24 * 60 * 60 * 1000), // 10 days from now
       priority: 'medium',
       status: 'pending',
     },
   ];
 
-  await Promise.all(
-    sampleTasks.map(task =>
-      prisma.task.create({ data: task })
-    )
-  );
+  await Task.insertMany(sampleTasks);
 
   console.log('✓ Created', sampleTasks.length, 'sample tasks');
 
@@ -110,7 +102,8 @@ async function main() {
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   console.log('Admin:');
   console.log('  Email:', admin.email);
-  console.log('  ID:', admin.id);
+  console.log('  Password:', defaultPassword);
+  console.log('  ID:', admin._id);
   console.log('\nInterns:');
   interns.forEach((intern, i) => {
     console.log(`  ${i + 1}. ${intern.name} (${intern.email})`);
@@ -120,10 +113,10 @@ async function main() {
 
 main()
   .then(async () => {
-    await prisma.$disconnect();
+    await disconnectDB();
   })
   .catch(async (e) => {
     console.error('❌ Seeding error:', e);
-    await prisma.$disconnect();
+    await disconnectDB();
     process.exit(1);
   });
