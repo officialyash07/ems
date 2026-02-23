@@ -51,14 +51,18 @@ export const apiFetch = async (endpoint, options = {}) => {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
     
     if (!response.ok) {
+      let parsedError = null;
+
       try {
-        const error = await response.json();
-        console.error(`[apiFetch] API Error Response:`, error);
-        throw new Error(error.error || `API error: ${response.status}`);
+        parsedError = await response.json();
       } catch (parseError) {
         console.error(`[apiFetch] Could not parse error response:`, parseError);
-        throw new Error(`API error: ${response.status} ${response.statusText}`);
       }
+
+      console.error(`[apiFetch] API Error Response:`, parsedError);
+      throw new Error(
+        parsedError?.error || `API error: ${response.status} ${response.statusText}`
+      );
     }
     
     const data = await response.json();

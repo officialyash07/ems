@@ -19,11 +19,52 @@ async function main() {
   // Create admin user
   const admin = await User.create({
     email: 'admin@owms.com',
-    name: 'Admin User',
+    name: 'hariom singh',
     role: 'admin',
     password: hashedPassword,
   });
   console.log('✓ Created admin user:', admin.email);
+
+  // Create leadership users
+  const leadershipUsers = await User.insertMany([
+    {
+      email: 'teamlead@owms.com',
+      name: 'Team Lead User',
+      role: 'team_lead',
+      password: hashedPassword,
+    },
+    {
+      email: 'manager@owms.com',
+      name: 'Manager User',
+      role: 'manager',
+      password: hashedPassword,
+    },
+    {
+      email: 'cto@owms.com',
+      name: 'CTO User',
+      role: 'cto',
+      password: hashedPassword,
+    },
+    {
+      email: 'cfo@owms.com',
+      name: 'CFO User',
+      role: 'cfo',
+      password: hashedPassword,
+    },
+    {
+      email: 'coo@owms.com',
+      name: 'COO User',
+      role: 'coo',
+      password: hashedPassword,
+    },
+    {
+      email: 'ceo@owms.com',
+      name: 'CEO User',
+      role: 'ceo',
+      password: hashedPassword,
+    },
+  ]);
+  console.log('✓ Created', leadershipUsers.length, 'leadership users');
 
   // Create department
   const dept = await Department.create({
@@ -34,6 +75,12 @@ async function main() {
 
   // Create intern users
   const interns = await User.insertMany([
+    {
+      email: 'intern@owms.com',
+      name: 'Intern User',
+      role: 'intern',
+      password: hashedPassword,
+    },
     {
       email: 'sarah.jones@owms.com',
       name: 'Sarah Jones',
@@ -100,11 +147,19 @@ async function main() {
   console.log('\n✅ Database seeding completed!\n');
   console.log('Test User Credentials:');
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-  console.log('Admin:');
-  console.log('  Email:', admin.email);
-  console.log('  Password:', defaultPassword);
-  console.log('  ID:', admin._id);
-  console.log('\nInterns:');
+  const quickLoginUsers = [
+    admin,
+    ...leadershipUsers,
+    interns[0],
+  ];
+
+  quickLoginUsers.forEach((user) => {
+    console.log(`${user.role}:`);
+    console.log('  Email:', user.email);
+    console.log('  Password:', defaultPassword);
+  });
+
+  console.log('\nAll Interns:');
   interns.forEach((intern, i) => {
     console.log(`  ${i + 1}. ${intern.name} (${intern.email})`);
   });
