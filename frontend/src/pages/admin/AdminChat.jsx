@@ -25,7 +25,7 @@ const people = {
         },
         {
             id: 2,
-            name: "Michael O'Connell",
+            name: "Michael O'Connel",
             role: "Sales Lead",
             online: true,
             avatar: "https://randomuser.me/api/portraits/men/32.jpg",

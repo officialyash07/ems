@@ -1,27 +1,17 @@
 const express = require('express');
+const cors = require('cors');
 const path = require('path');
 const app = express();
 
-// CORS middleware
-app.use((req, res, next) => {
-  const allowedOrigins = ['http://localhost:5173', 'http://localhost:5174'];
-  const origin = req.headers.origin;
-  
-  if (allowedOrigins.includes(origin)) {
-    res.header('Access-Control-Allow-Origin', origin);
-  }
-  
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
-  }
-  
-  next();
-});
+// CORS configuration
+const corsOptions = {
+  origin: ['http://localhost:5173', 'http://localhost:5174'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+};
 
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // Request logging middleware
@@ -41,9 +31,11 @@ app.use('/uploads', (req, res, next) => {
 
 const taskRoutes = require('./modules/tasks/task.routes');
 const submissionsRoutes = require('./modules/submissions/submissions.routes');
+const chatRoutes = require('./modules/chat/chat.routes');
 
 app.use('/api/tasks', taskRoutes);
 app.use('/api/submissions', submissionsRoutes);
+app.use('/api/chat', chatRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
