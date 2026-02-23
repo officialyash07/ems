@@ -3,7 +3,7 @@ const submissionsService = require('./submissions.service');
 exports.create = async (req, res) => {
   try {
     console.log('[create] Starting submission creation...');
-    console.log('[create] Body:', { taskId: req.body?.taskId, submittedById: req.body?.submittedById });
+    console.log('[create] Body:', { taskId: req.body?.taskId, submittedById: req.user?.id });
     console.log('[create] File:', req.file ? { filename: req.file.filename, mimetype: req.file.mimetype } : 'NO FILE');
     
     // Validate required fields
@@ -11,14 +11,14 @@ exports.create = async (req, res) => {
       console.log('[create] Error: taskId missing');
       return res.status(400).json({ error: 'taskId is required' });
     }
-    if (!req.body.submittedById) {
+    if (!req.user?.id) {
       console.log('[create] Error: submittedById missing');
-      return res.status(400).json({ error: 'submittedById is required' });
+      return res.status(400).json({ error: 'Authenticated user is required' });
     }
 
     const data = {
       taskId: req.body.taskId,
-      submittedById: req.body.submittedById,
+      submittedById: req.user.id,
       externalLink: req.body.externalLink,
       comment: req.body.comment,
       file: req.file
@@ -70,7 +70,7 @@ exports.review = async (req, res) => {
   try {
     console.log('[review] Starting review process...');
     console.log('[review] Submission ID:', req.params.id);
-    console.log('[review] Review data:', { reviewerId: req.body?.reviewerId, status: req.body?.status });
+    console.log('[review] Review data:', { reviewerId: req.user?.id, status: req.body?.status });
     
     // Validate required fields
     if (!req.params.id) {
@@ -81,13 +81,13 @@ exports.review = async (req, res) => {
       console.log('[review] Error: status missing');
       return res.status(400).json({ error: 'Status is required' });
     }
-    if (!req.body.reviewerId) {
+    if (!req.user?.id) {
       console.log('[review] Error: reviewerId missing');
-      return res.status(400).json({ error: 'ReviewerId is required' });
+      return res.status(400).json({ error: 'Authenticated reviewer is required' });
     }
 
     const updated = await submissionsService.reviewSubmission(req.params.id, {
-      reviewerId: req.body.reviewerId,
+      reviewerId: req.user.id,
       status: req.body.status,
       reviewComment: req.body.reviewComment || ''
     });

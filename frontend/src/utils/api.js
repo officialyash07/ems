@@ -1,6 +1,15 @@
 // API base URL configuration
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
+const getStoredToken = () => {
+  try {
+    const auth = JSON.parse(localStorage.getItem('auth') || '{}');
+    return auth?.token || null;
+  } catch (error) {
+    return null;
+  }
+};
+
 // Generic fetch wrapper
 export const apiFetch = async (endpoint, options = {}) => {
   const { method = 'GET', body, isFormData = false, ...rest } = options;
@@ -15,6 +24,18 @@ export const apiFetch = async (endpoint, options = {}) => {
     config.headers = {
       'Content-Type': 'application/json',
       ...rest.headers,
+    };
+  } else {
+    config.headers = {
+      ...rest.headers,
+    };
+  }
+
+  const token = getStoredToken();
+  if (token) {
+    config.headers = {
+      ...config.headers,
+      Authorization: `Bearer ${token}`,
     };
   }
 
@@ -92,6 +113,23 @@ export const tasksApi = {
   // Get task versions
   getVersions: (id) =>
     apiFetch(`/tasks/${id}/versions`, {
+      method: 'GET',
+    }),
+};
+
+export const authApi = {
+  register: (userData) =>
+    apiFetch('/auth/register', {
+      method: 'POST',
+      body: userData,
+    }),
+  login: (credentials) =>
+    apiFetch('/auth/login', {
+      method: 'POST',
+      body: credentials,
+    }),
+  me: () =>
+    apiFetch('/auth/me', {
       method: 'GET',
     }),
 };

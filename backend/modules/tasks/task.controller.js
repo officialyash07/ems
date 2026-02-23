@@ -2,7 +2,12 @@ const taskService = require('./task.service');
 
 exports.createTask = async (req, res) => {
   try {
-    const task = await taskService.createTask(req.body);
+    const payload = {
+      ...req.body,
+      assignedById: req.user?.id || req.body.assignedById
+    };
+
+    const task = await taskService.createTask(payload);
     res.status(201).json(task);
   } catch (error) {
     console.error("CREATE TASK ERROR:", error.message);
@@ -36,7 +41,12 @@ exports.updateTask = async (req, res) => {
   console.log("REQ PARAM ID:", req.params.id);
 
   try {
-    const task = await taskService.updateTask(req.params.id, req.body);
+    const payload = {
+      ...req.body,
+      changedById: req.user?.id || req.body.changedById
+    };
+
+    const task = await taskService.updateTask(req.params.id, payload);
     res.json(task);
   } catch (error) {
     console.error("UPDATE ERROR:", error.message);

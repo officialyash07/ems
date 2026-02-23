@@ -6,26 +6,38 @@ const authSlice = createSlice({
     name: "auth",
     initialState: savedAuth || {
         isAuthenticated: false,
+        token: null,
+        id: null,
+        name: null,
         role: null,
         email: null,
     },
     reducers: {
         login: (state, action) => {
             state.isAuthenticated = true;
-            state.role = action.payload.role;
-            state.email = action.payload.email;
+            state.token = action.payload.token;
+            state.id = action.payload.user.id;
+            state.name = action.payload.user.name;
+            state.role = action.payload.user.role;
+            state.email = action.payload.user.email;
 
             localStorage.setItem(
                 "auth",
                 JSON.stringify({
                     isAuthenticated: true,
-                    role: action.payload.role,
-                    email: action.payload.email,
+                    token: action.payload.token,
+                    id: action.payload.user.id,
+                    name: action.payload.user.name,
+                    role: action.payload.user.role,
+                    email: action.payload.user.email,
                 }),
             );
         },
         logout: (state) => {
             state.isAuthenticated = false;
+            state.token = null;
+            state.id = null;
+            state.name = null;
             state.role = null;
             state.email = null;
 

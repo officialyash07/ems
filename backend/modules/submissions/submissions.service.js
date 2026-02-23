@@ -1,4 +1,5 @@
-const prisma = require('../../config/prisma');
+const Task = require('../../models/Task');
+const Submission = require('../../models/Submission');
 
 const isValidUrl = (url) => {
   try {
@@ -12,8 +13,8 @@ const isValidUrl = (url) => {
 exports.createSubmission = async ({ taskId, submittedById, externalLink, comment, file }) => {
   console.log('[createSubmission] Starting with:', { taskId, submittedById });
   
-  const task = await prisma.task.findUnique({ where: { id: taskId } });
-  console.log('[createSubmission] Task found:', task ? `${task.id} - ${task.title}` : 'NOT FOUND');
+  const task = await Task.findById(taskId);
+  console.log('[createSubmission] Task found:', task ? `${task._id} - ${task.title}` : 'NOT FOUND');
   if (!task) throw new Error('Task not found');
 
   if (externalLink && !isValidUrl(externalLink)) {
@@ -24,36 +25,31 @@ exports.createSubmission = async ({ taskId, submittedById, externalLink, comment
   const fileUrl = file && file.filename ? `/uploads/${file.filename}` : null;
   console.log('[createSubmission] File URL:', fileUrl);
 
-  const submission = await prisma.submission.create({
-    data: {
-      taskId,
-      submittedById,
-      versionNo: task.versionNo,
-      fileUrl,
-      externalLink,
-      comment
-    },
-    include: {
-      submittedBy: true,
-      task: true
-    }
+  const submission = await Submission.create({
+    taskId,
+    submittedById,
+    versionNo: task.versionNo,
+    fileUrl,
+    externalLink,
+    comment
   });
 
-  console.log('[createSubmission] Submission created:', { id: submission.id, taskId: submission.taskId });
-  return submission;
+  const populated = await Submission.findById(submission._id)
+    .populate('submittedBy')
+    .populate('task');
+
+  console.log('[createSubmission] Submission created:', { id: submission._id, taskId: submission.taskId });
+  return populated;
 };
 
 exports.getByTask = async (taskId) => {
   try {
-    const submissions = await prisma.submission.findMany({
-      where: { taskId },
-      include: {
-        submittedBy: true,
-        reviewedBy: true,
-        task: true
-      },
-      orderBy: { createdAt: 'desc' }
-    });
+    const submissions = await Submission.find({ taskId })
+      .populate('submittedBy')
+      .populate('reviewedBy')
+      .populate('task')
+      .sort({ createdAt: -1 })
+      .lean();
     return submissions || [];
   } catch (error) {
     console.error(`Error fetching submissions for task ${taskId}:`, error);
@@ -62,34 +58,28 @@ exports.getByTask = async (taskId) => {
 };
 
 exports.getSubmissionHistory = async (taskId, submittedById) => {
-  return prisma.submission.findMany({
-    where: {
-      taskId,
-      submittedById
-    },
-    include: {
-      submittedBy: true,
-      reviewedBy: true,
-      task: true
-    },
-    orderBy: { createdAt: 'desc' }
-  });
+  return Submission.find({
+    taskId,
+    submittedById
+  })
+    .populate('submittedBy')
+    .populate('reviewedBy')
+    .populate('task')
+    .sort({ createdAt: -1 })
+    .lean();
 };
 
 exports.getSubmissionById = async (id) => {
-  const submission = await prisma.submission.findUnique({
-    where: { id },
-    include: {
-      submittedBy: true,
-      reviewedBy: true,
-      task: {
-        include: {
-          assignedTo: true,
-          assignedBy: true
-        }
+  const submission = await Submission.findById(id)
+    .populate('submittedBy')
+    .populate('reviewedBy')
+    .populate({
+      path: 'task',
+      populate: {
+        path: 'assignedTo assignedBy'
       }
-    }
-  });
+    })
+    .lean();
 
   if (!submission) {
     throw new Error('Submission not found');
@@ -107,9 +97,7 @@ exports.reviewSubmission = async (id, { reviewerId, status, reviewComment }) => 
     throw new Error(`Invalid status: ${status}. Must be one of: ${valid.join(', ')}`);
   }
 
-  const submission = await prisma.submission.findUnique({
-    where: { id }
-  });
+  const submission = await Submission.findById(id);
 
   if (!submission) {
     console.log('[reviewSubmission] Submission not found:', id);
@@ -118,35 +106,30 @@ exports.reviewSubmission = async (id, { reviewerId, status, reviewComment }) => 
 
   console.log('[reviewSubmission] Updating submission:', { id, oldStatus: submission.status, newStatus: status });
 
-  const updated = await prisma.submission.update({
-    where: { id },
-    data: {
+  const updated = await Submission.findByIdAndUpdate(
+    id,
+    {
       reviewedById: reviewerId,
       status,
       reviewComment: reviewComment || null,
       updatedAt: new Date()
     },
-    include: {
-      submittedBy: true,
-      reviewedBy: true,
-      task: true
-    }
-  });
+    { new: true }
+  )
+    .populate('submittedBy')
+    .populate('reviewedBy')
+    .populate('task');
 
-  console.log('[reviewSubmission] Successfully updated submission:', updated?.id);
+  console.log('[reviewSubmission] Successfully updated submission:', updated?._id);
   return updated;
 };
 
 exports.deleteSubmission = async (id) => {
-  const submission = await prisma.submission.findUnique({
-    where: { id }
-  });
+  const submission = await Submission.findById(id);
 
   if (!submission) {
     throw new Error('Submission not found');
   }
 
-  return prisma.submission.delete({
-    where: { id }
-  });
+  return Submission.findByIdAndDelete(id);
 };
