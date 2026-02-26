@@ -17,10 +17,17 @@ import InternProfile from "./pages/intern/InternProfile";
 
 /* Team Lead Pages */
 import TlDashboard from "./pages/tl-panel/TlDashboard";
-import TlInternTask from "./pages/tl-panel/TlInternTask";
+import TlInternTask from "./pages/tl-panel/TlTask";
 import TlSubmissionsReview from "./pages/tl-panel/TlSubmissionsReview";
 import TlMeetings from "./pages/tl-panel/TlMeetings";
 import TlDepartmentChat from "./pages/tl-panel/TlDepartmentChat";
+
+/*Team Lead Intern Pages */
+import TlDashboardIntern from "./pages/tl-intern/TlDashboardIntern";
+import TlDepartmentIntern from "./pages/tl-intern/TlDepartmentIntern";
+import TlSubmissionsReviewIntern from "./pages/tl-intern/TlSubmissionsReviewIntern";
+import TlInternTaskIntern from "./pages/tl-intern/TlInternTaskIntern";
+import TlMeetingsIntern from "./pages/tl-intern/TlMeetingsIntern";
 
 /* Manager Pages */
 import ManagerDashboard from "./pages/manager/ManagerDashboard";
@@ -106,10 +113,28 @@ export const router = createBrowserRouter([
         children: [
             { index: true, element: <Navigate to="dashboard" /> },
             { path: "dashboard", element: <TlDashboard /> },
-            { path: "intern-tasks", element: <TlInternTask /> },
+            { path: "tasks", element: <TlInternTask /> },
             { path: "reviews", element: <TlSubmissionsReview /> },
             { path: "meetings", element: <TlMeetings /> },
             { path: "chat", element: <TlDepartmentChat /> },
+        ],
+    },
+
+    /* ================= TEAM LEAD INTERN ================= */
+    {
+        path: "/team_lead_intern",
+        element: (
+            <ProtectedRoute allowedRoles={[ROLES.TLINTERN]}>
+                <DashboardLayout />
+            </ProtectedRoute>
+        ),
+        children: [
+            { index: true, element: <Navigate to="dashboard" /> },
+            { path: "dashboard", element: <TlDashboardIntern /> },
+            { path: "intern-tasks", element: <TlInternTaskIntern /> },
+            { path: "reviews", element: <TlSubmissionsReviewIntern /> },
+            { path: "meetings", element: <TlMeetingsIntern /> },
+            { path: "chat", element: <TlDepartmentIntern /> },
         ],
     },
 
