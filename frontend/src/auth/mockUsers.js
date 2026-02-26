@@ -14,3 +14,4 @@ const mockUsers = [
 ];
 
 export { mockUsers };
+export default mockUsers;

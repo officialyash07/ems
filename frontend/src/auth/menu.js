@@ -44,3 +44,4 @@ const MENU = {
 };
 
 export { MENU };
+export default MENU;
