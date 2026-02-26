@@ -40,7 +40,6 @@ import ManagerDepartmentChat from "./pages/manager/ManagerDepartmentChat";
 import MeetingRoom from "./pages/manager/MeetingRoom";
 
 
-
 /* Admin Pages */
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminUserManagement from "./pages/admin/AdminUserManagement";
@@ -163,7 +162,7 @@ export const router = createBrowserRouter([
       { path: "reports", element: <ManagerReports /> },
       { path: "meetings", element: <ManagerMeetings /> },
       { path: "chat", element: <ManagerDepartmentChat /> },
-      { path: "review-submissions", element: <InternSubmissionsReview /> },
+      // { path: "review-submissions", element: <InternSubmissionsReview /> },
       { path: "meeting-room/:id", element: <MeetingRoom /> },
       // { path: "meeting-room/:id", element: <MeetingRoom /> }
 
