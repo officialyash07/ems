@@ -1,6 +1,7 @@
 const ROLES = {
     INTERN: "intern",
     TL: "team_lead",
+    TLINTERN: "team_lead_intern",
     MANAGER: "manager",
     ADMIN: "admin",
     CTO: "cto",

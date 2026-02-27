@@ -11,6 +11,7 @@ const Login = () => {
     const quickLoginUsers = [
         { role: "intern", email: "intern@owms.com", name: "Intern User" },
         { role: "team_lead", email: "teamlead@owms.com", name: "Team Lead User" },
+        { role: "team_lead_intern", email: "tlintern@owms.com", name: "Team Lead Intern User" },
         { role: "manager", email: "manager@owms.com", name: "Manager User" },
         { role: "admin", email: "admin@owms.com", name: "Admin User" },
         { role: "cto", email: "cto@owms.com", name: "CTO User" },
@@ -88,7 +89,8 @@ const Login = () => {
     };
 
     const formatRoleLabel = (role) => {
-        if (role === "team_lead") return "team_lead";
+        if (role === "team_lead") return "Team Lead";
+        if (role === "team_lead_intern") return "TL Intern";
         return role;
     };
 

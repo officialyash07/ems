@@ -19,25 +19,17 @@ import InternMeetingRoom from "./pages/intern/InternMeetingRoom";
 
 /* Team Lead Pages */
 import TlDashboard from "./pages/tl-panel/TlDashboard";
-import TlInternTask from "./pages/tl-panel/TlInternTask";
+import TlInternTask from "./pages/tl-panel/TlTask";
 import TlSubmissionsReview from "./pages/tl-panel/TlSubmissionsReview";
 import TlMeetings from "./pages/tl-panel/TlMeetings";
 import TlDepartmentChat from "./pages/tl-panel/TlDepartmentChat";
-import InternSubmissionsReview from "./pages/intern/InternSubmissionsReview";
-import TlMeetingRoom from "./pages/tl-panel/TlMeetingRoom";
 
-
-/* Manager Pages */
-// import ManagerDashboard from "./pages/manager/ManagerDashboard";
-// import ManagerAnalytics from "./pages/manager/ManagerAnalytics";
-// import ManagerReports from "./pages/manager/ManagerReports";
-// import ManagerMeetings from "./pages/manager/ManagerMeetings";
-// import ManagerDepartmentChat from "./pages/manager/ManagerDepartmentChat";
-// import ManagerSubmissionsReview from "./pages/intern/InternSubmissionsReview"; // ADDED
-// import TlMeetings from "./pages/tl-panel/TlMeetings";
-// import TlDepartmentChat from "./pages/tl-panel/TlDepartmentChat";
-// import InternSubmissionsReview from "./pages/intern/InternSubmissionsReview";
-
+/*Team Lead Intern Pages */
+import TlDashboardIntern from "./pages/tl-intern/TlDashboardIntern";
+import TlDepartmentIntern from "./pages/tl-intern/TlDepartmentIntern";
+import TlSubmissionsReviewIntern from "./pages/tl-intern/TlSubmissionsReviewIntern";
+import TlInternTaskIntern from "./pages/tl-intern/TlInternTaskIntern";
+import TlMeetingsIntern from "./pages/tl-intern/TlMeetingsIntern";
 
 /* Manager Pages */
 import ManagerDashboard from "./pages/manager/ManagerDashboard";
@@ -46,7 +38,6 @@ import ManagerReports from "./pages/manager/ManagerReports";
 import ManagerMeetings from "./pages/manager/ManagerMeetings";
 import ManagerDepartmentChat from "./pages/manager/ManagerDepartmentChat";
 import MeetingRoom from "./pages/manager/MeetingRoom";
-
 
 
 /* Admin Pages */
@@ -120,26 +111,41 @@ export const router = createBrowserRouter([
     ],
   },
 
-  /* ================= TEAM LEAD ================= */
-  {
-    path: "/team_lead",
-    element: (
-      <ProtectedRoute allowedRoles={[ROLES.TL]}>
-        <DashboardLayout />
-      </ProtectedRoute>
-    ),
-    children: [
-      { index: true, element: <Navigate to="dashboard" /> },
-      { path: "dashboard", element: <TlDashboard /> },
-      { path: "intern-tasks", element: <TlInternTask /> },
-      { path: "reviews", element: <TlSubmissionsReview /> },
-      { path: "meetings", element: <TlMeetings /> },
-      { path: "chat", element: <TlDepartmentChat /> },
-      { path: "review-submissions", element: <InternSubmissionsReview /> },
-      { path: "tl-meeting-room/:id", element: <TlMeetingRoom /> },
-     
-    ],
-  },
+    /* ================= TEAM LEAD ================= */
+    {
+        path: "/team_lead",
+        element: (
+            <ProtectedRoute allowedRoles={[ROLES.TL]}>
+                <DashboardLayout />
+            </ProtectedRoute>
+        ),
+        children: [
+            { index: true, element: <Navigate to="dashboard" /> },
+            { path: "dashboard", element: <TlDashboard /> },
+            { path: "tasks", element: <TlInternTask /> },
+            { path: "reviews", element: <TlSubmissionsReview /> },
+            { path: "meetings", element: <TlMeetings /> },
+            { path: "chat", element: <TlDepartmentChat /> },
+        ],
+    },
+
+    /* ================= TEAM LEAD INTERN ================= */
+    {
+        path: "/team_lead_intern",
+        element: (
+            <ProtectedRoute allowedRoles={[ROLES.TLINTERN]}>
+                <DashboardLayout />
+            </ProtectedRoute>
+        ),
+        children: [
+            { index: true, element: <Navigate to="dashboard" /> },
+            { path: "dashboard", element: <TlDashboardIntern /> },
+            { path: "intern-tasks", element: <TlInternTaskIntern /> },
+            { path: "reviews", element: <TlSubmissionsReviewIntern /> },
+            { path: "meetings", element: <TlMeetingsIntern /> },
+            { path: "chat", element: <TlDepartmentIntern /> },
+        ],
+    },
 
   /* ================= MANAGER ================= */
   {
@@ -156,7 +162,7 @@ export const router = createBrowserRouter([
       { path: "reports", element: <ManagerReports /> },
       { path: "meetings", element: <ManagerMeetings /> },
       { path: "chat", element: <ManagerDepartmentChat /> },
-      { path: "review-submissions", element: <InternSubmissionsReview /> },
+      // { path: "review-submissions", element: <InternSubmissionsReview /> },
       { path: "meeting-room/:id", element: <MeetingRoom /> },
       // { path: "meeting-room/:id", element: <MeetingRoom /> }
 
