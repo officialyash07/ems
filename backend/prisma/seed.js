@@ -34,6 +34,12 @@ async function main() {
       password: hashedPassword,
     },
     {
+      email: 'tlintern@owms.com',
+      name: 'Team Lead Intern User',
+      role: 'team_lead_intern',
+      password: hashedPassword,
+    },
+    {
       email: 'manager@owms.com',
       name: 'Manager User',
       role: 'manager',

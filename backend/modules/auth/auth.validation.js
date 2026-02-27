@@ -1,4 +1,4 @@
-const ROLE_SET = new Set(['intern', 'team_lead', 'manager', 'admin', 'cto', 'cfo', 'coo', 'ceo']);
+const ROLE_SET = new Set(['intern', 'team_lead', 'team_lead_intern', 'manager', 'admin', 'cto', 'cfo', 'coo', 'ceo']);
 
 const normalizeRole = (role = '') => String(role).trim().toLowerCase();
 
