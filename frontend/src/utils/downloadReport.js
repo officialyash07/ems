@@ -15,7 +15,7 @@ export function downloadReport(report) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  const safeName = (title || "report").replace(/[^a-z0-9_\-]/gi, "_");
+  const safeName = (title || "report").replace(/[^a-z0-9_-]/gi, "_");
   a.download = `${safeName}_${date}.csv`;
   document.body.appendChild(a);
   a.click();

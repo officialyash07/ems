@@ -13,6 +13,7 @@ const Login = () => {
         { role: "team_lead", email: "teamlead@owms.com", name: "Team Lead User" },
         { role: "team_lead_intern", email: "tlintern@owms.com", name: "Team Lead Intern User" },
         { role: "manager", email: "manager@owms.com", name: "Manager User" },
+        { role: "manager_intern", email: "manager_intern@owms.com", name: "Manager Intern User" },
         { role: "admin", email: "admin@owms.com", name: "Admin User" },
         { role: "cto", email: "cto@owms.com", name: "CTO User" },
         { role: "cfo", email: "cfo@owms.com", name: "CFO User" },
