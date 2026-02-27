@@ -39,6 +39,14 @@ import ManagerMeetings from "./pages/manager/ManagerMeetings";
 import ManagerDepartmentChat from "./pages/manager/ManagerDepartmentChat";
 import MeetingRoom from "./pages/manager/MeetingRoom";
 
+/* Manager Intern Pages */
+import Manager_internDashboard from "./pages/manager_intern/Manager_internDashboard";
+import Manager_internAnalytics from "./pages/manager_intern/Manager_internAnalytics";
+import Manager_internMeetings from "./pages/manager_intern/Manager_internMeetings";
+import Manager_internDepartmentChat from "./pages/manager_intern/Manager_internDepartmentChat";
+import Manager_internReports from "./pages/manager_intern/Manager_internReports";
+import Manager_internSubmissionsReview from "./pages/manager_intern/Manager_internSubmissionsReview";
+
 
 /* Admin Pages */
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -169,6 +177,31 @@ export const router = createBrowserRouter([
     
     ],
   },
+
+
+
+   {
+    path: "/manager_intern",
+    element: (
+      <ProtectedRoute allowedRoles={[ROLES.MANAGER_INTERN]}>
+        <DashboardLayout />
+      </ProtectedRoute>
+    ),
+    children: [
+      { index: true, element: <Navigate to="dashboard" /> },
+      { path: "dashboard", element: <Manager_internDashboard /> },
+     
+      { path: "intern-analytics", element: <Manager_internAnalytics /> },
+      { path: "intern-meetings", element: <Manager_internMeetings /> },
+      { path: "chat", element: <Manager_internDepartmentChat /> },
+      { path: "reports", element: <Manager_internReports /> },
+      { path: "review-submissions", element: <Manager_internSubmissionsReview /> },
+     
+
+    
+    ],
+  },
+
 
   /* ================= ADMIN ================= */
   {
