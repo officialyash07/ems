@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 
 const connectDB = async () => {
   try {
+    debugger;
     const mongoURL = process.env.MONGODB_URL || 'mongodb://localhost:27017/ems';
     
     await mongoose.connect(mongoURL);
