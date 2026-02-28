@@ -16,6 +16,16 @@ const ROLE_PERMISSIONS = {
 		'submission.read',
 		'submission.review'
 	],
+	manager_intern: [
+		'task.read',
+		'task.create',
+		'task.update',
+		'task.assign',
+		'submission.read',
+		'submission.review',
+		'analytics.read',
+		'reports.read'
+	],
 	manager: [
 		'task.read',
 		'task.create',
