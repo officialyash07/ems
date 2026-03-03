@@ -21,6 +21,7 @@ import {
 /* TEAM LEAD DATA */
 const tlData = {
   channels: [
+    /*
     {
       id: "general",
       name: "General",
@@ -39,6 +40,7 @@ const tlData = {
       description: "PRs & technical discussions",
       type: "channel",
     },
+    */
     {
       id: "tech-support",
       name: "Tech Support",
@@ -121,10 +123,12 @@ const initialMessages = {
 };
 
 const TlDepartmentChat = () => {
-  const [activeChat, setActiveChat] = useState(tlData.channels[0]);
+  const [activeChat, setActiveChat] = useState(tlData.channels[1]); // Assuming announcements is at index 1 now that first 3 are commented
   const [messages, setMessages] = useState(initialMessages);
   const [sharedAnnouncements, setSharedAnnouncements] = useState([]);
-  const [sharedTechSupportMessages, setSharedTechSupportMessages] = useState([]);
+  const [sharedTechSupportMessages, setSharedTechSupportMessages] = useState(
+    [],
+  );
   const [input, setInput] = useState("");
   const fileInputRef = useRef(null);
 
@@ -273,6 +277,7 @@ const TlDepartmentChat = () => {
           </div>
 
           {/* Groups Section */}
+          {/*
           <div className="px-4 py-2 text-[10px] font-bold text-slate-400 flex items-center gap-1 uppercase tracking-widest">
             <ChevronDown size={12} /> Groups
           </div>
@@ -307,6 +312,7 @@ const TlDepartmentChat = () => {
               </button>
             ))}
           </div>
+          */}
         </div>
       </div>
 
