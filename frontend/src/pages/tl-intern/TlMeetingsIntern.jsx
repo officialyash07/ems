@@ -1,43 +1,30 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Plus } from "lucide-react";
 
 import MeetingCard from "../../components/tl-panel/MeetingCard";
 import Section from "../../components/tl-panel/Section";
 import CreateMeetingModal from "../../components/tl-panel/CreateMeetingModal";
+import {
+    addMeetingToStore,
+    getMeetingsByCreator,
+    getMeetingsForRole,
+} from "../../utils/meetingsStore";
 
 const TlMeetings = () => {
-    const [myMeetings, setMyMeetings] = useState([
-        {
-            id: 1,
-            title: "Weekly Sync - Interns Group A",
-            datetime: "Mon, Dec 29, 2025 at 10:00 AM",
-            participants: ["John S.", "Sarah L.", "Emily C."],
-            status: "Scheduled",
-        },
-        {
-            id: 2,
-            title: "1-on-1 with David Lee",
-            datetime: "Mon, Dec 29, 2025 at 1:30 PM",
-            participants: ["David Lee"],
-            status: "Ongoing",
-        },
-    ]);
-
-    const managerMeetings = [
-        {
-            id: 3,
-            title: "Team Lead Monthly Sync",
-            datetime: "Tue, Dec 30, 2025 at 11:00 AM",
-            participants: ["All Team Leads", "Michael B. (Manager)"],
-            status: "Scheduled",
-        },
-    ];
+    const [myMeetings, setMyMeetings] = useState([]);
+    const [managerMeetings, setManagerMeetings] = useState([]);
 
     const [open, setOpen] = useState(false);
 
+    useEffect(() => {
+        setMyMeetings(getMeetingsByCreator("team_lead_intern"));
+        setManagerMeetings(getMeetingsForRole("team_lead_intern", ["manager"]));
+    }, []);
+
     const addMeeting = (meeting) => {
-        setMyMeetings((prev) => [...prev, { id: Date.now(), ...meeting }]);
+        const createdMeeting = addMeetingToStore(meeting, "team_lead_intern");
+        setMyMeetings((prev) => [...prev, createdMeeting]);
     };
 
     return (
@@ -66,9 +53,13 @@ const TlMeetings = () => {
 
             {/* Meetings Scheduled by Manager */}
             <Section title="Meetings Scheduled by Manager">
-                {managerMeetings.map((m) => (
-                    <MeetingCard key={m.id} meeting={m} joinOnly />
-                ))}
+                {managerMeetings.length > 0 ? (
+                    managerMeetings.map((m) => (
+                        <MeetingCard key={m.id} meeting={m} joinOnly />
+                    ))
+                ) : (
+                    <p className="text-sm text-slate-500">No meetings scheduled by Manager.</p>
+                )}
             </Section>
 
             {open && (

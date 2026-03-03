@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   Search,
   Send,
@@ -9,6 +9,7 @@ import {
   MoreVertical,
   File,
 } from "lucide-react";
+import { getSharedTechSupportMessages } from "../../utils/techSupportStore";
 
 /* OPERATIONS DATA */
 const opsData = {
@@ -54,6 +55,12 @@ const opsData = {
       description: "Urgent operational issues",
       type: "channel",
     },
+    {
+      id: "tech-support",
+      name: "Tech Support",
+      description: "Shared support inbox",
+      type: "channel",
+    },
   ],
   group: {
     id: "ops-team-group",
@@ -87,12 +94,29 @@ const initialMessages = {
 const CooDepartmentChat = () => {
   const [activeChat, setActiveChat] = useState(opsData.channels[0]);
   const [messages, setMessages] = useState(initialMessages);
+  const [sharedTechSupportMessages, setSharedTechSupportMessages] = useState([]);
   const [input, setInput] = useState("");
   const [groupMembers, setGroupMembers] = useState(opsData.managers);
   const [showAddModal, setShowAddModal] = useState(false);
   const fileInputRef = useRef(null);
 
-  const currentMessages = messages[activeChat.id] || [];
+  useEffect(() => {
+    setSharedTechSupportMessages(getSharedTechSupportMessages());
+
+    const onStorage = (event) => {
+      if (event.key === "ems_shared_tech_support_messages") {
+        setSharedTechSupportMessages(getSharedTechSupportMessages());
+      }
+    };
+
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
+
+  const currentMessages =
+    activeChat.id === "tech-support"
+      ? sharedTechSupportMessages
+      : messages[activeChat.id] || [];
 
   const sendMessage = () => {
     if (!input.trim()) return;

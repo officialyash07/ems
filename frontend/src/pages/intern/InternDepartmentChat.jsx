@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   Search,
   Send,
@@ -9,6 +9,11 @@ import {
   MoreVertical,
   File,
 } from "lucide-react";
+import { getSharedAnnouncements } from "../../utils/announcementsStore";
+import {
+  addSharedTechSupportMessage,
+  getSharedTechSupportMessages,
+} from "../../utils/techSupportStore";
 
 /* INTERN DEPARTMENT DATA */
 const internData = {
@@ -90,13 +95,51 @@ const initialMessages = {
 const InternDepartmentChat = () => {
   const [activeChat, setActiveChat] = useState(internData.channels[0]);
   const [messages, setMessages] = useState(initialMessages);
+  const [sharedAnnouncements, setSharedAnnouncements] = useState([]);
+  const [sharedTechSupportMessages, setSharedTechSupportMessages] = useState([]);
   const [input, setInput] = useState("");
   const fileInputRef = useRef(null);
 
-  const currentMessages = messages[activeChat.id] || [];
+  const isAnnouncementsChannel = activeChat.id === "announcements";
+  const isTechSupportChannel = activeChat.id === "tech-support";
+
+  useEffect(() => {
+    setSharedAnnouncements(getSharedAnnouncements());
+    setSharedTechSupportMessages(getSharedTechSupportMessages());
+
+    const onStorage = (event) => {
+      if (event.key === "ems_shared_announcements") {
+        setSharedAnnouncements(getSharedAnnouncements());
+      }
+      if (event.key === "ems_shared_tech_support_messages") {
+        setSharedTechSupportMessages(getSharedTechSupportMessages());
+      }
+    };
+
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
+
+  const currentMessages = isAnnouncementsChannel
+    ? sharedAnnouncements
+    : isTechSupportChannel
+      ? sharedTechSupportMessages
+      : messages[activeChat.id] || [];
 
   const sendMessage = () => {
+    if (isAnnouncementsChannel) return;
     if (!input.trim()) return;
+
+    if (isTechSupportChannel) {
+      const createdMessage = addSharedTechSupportMessage({
+        from: "Intern",
+        text: input,
+        sourceRole: "intern",
+      });
+      setSharedTechSupportMessages((prev) => [...prev, createdMessage]);
+      setInput("");
+      return;
+    }
 
     const newMessage = {
       from: "You",
@@ -117,6 +160,7 @@ const InternDepartmentChat = () => {
   };
 
   const handleFileUpload = (e) => {
+    if (isAnnouncementsChannel) return;
     const file = e.target.files[0];
     if (!file) return;
 
@@ -320,6 +364,11 @@ const InternDepartmentChat = () => {
 
         {/* Message Input Area */}
         <div className="border-t border-gray-200 px-6 py-5 bg-white">
+          {isAnnouncementsChannel ? (
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+              Announcements are read-only for interns. Messages here are posted by Team Lead and TL Intern.
+            </div>
+          ) : null}
           <div className="flex items-center gap-3 bg-slate-50 rounded-2xl border border-gray-200 p-2 focus-within:border-blue-400 focus-within:ring-4 ring-blue-500/5 transition-all">
             <input
               type="file"
@@ -329,6 +378,7 @@ const InternDepartmentChat = () => {
             />
             <button
               onClick={() => fileInputRef.current.click()}
+              disabled={isAnnouncementsChannel}
               className="p-2.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"
             >
               <Paperclip size={20} />
@@ -337,14 +387,19 @@ const InternDepartmentChat = () => {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-              placeholder={`Message ${activeChat.name}...`}
+              placeholder={
+                isAnnouncementsChannel
+                  ? "Read-only announcements"
+                  : `Message ${activeChat.name}...`
+              }
+              disabled={isAnnouncementsChannel}
               className="flex-1 bg-transparent px-2 py-2 text-sm outline-none border-none focus:ring-0"
             />
             <button
               onClick={sendMessage}
-              disabled={!input.trim()}
+              disabled={isAnnouncementsChannel || !input.trim()}
               className={`rounded-xl px-5 py-2.5 font-bold text-sm transition-all flex items-center gap-2 ${
-                input.trim()
+                !isAnnouncementsChannel && input.trim()
                   ? "bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-200"
                   : "bg-slate-200 text-slate-400 cursor-not-allowed"
               }`}

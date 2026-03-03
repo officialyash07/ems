@@ -1,26 +1,27 @@
 import { useState } from "react";
 
-const interns = [
-    { id: 1, name: "Sarah Jones" },
-    { id: 2, name: "David Lee" },
-    { id: 3, name: "Emily Chen" },
+const recipients = [
+    { id: 1, role: "team_lead", name: "Team Lead" },
+    { id: 2, role: "team_lead_intern", name: "Team Lead Intern" },
+    { id: 3, role: "manager_intern", name: "Manager Intern" },
+    { id: 4, role: "intern", name: "Intern" },
 ];
 
 const CreateMeetingModal = ({ onClose, onCreate }) => {
     const [form, setForm] = useState({
         title: "",
-        interns: [],
+        targetRoles: [],
         date: "",
         time: "",
         description: "",
     });
 
-    const toggleIntern = (name) => {
+    const toggleRecipient = (role) => {
         setForm((prev) => ({
             ...prev,
-            interns: prev.interns.includes(name)
-                ? prev.interns.filter((i) => i !== name)
-                : [...prev.interns, name],
+            targetRoles: prev.targetRoles.includes(role)
+                ? prev.targetRoles.filter((item) => item !== role)
+                : [...prev.targetRoles, role],
         }));
     };
 
@@ -34,14 +35,27 @@ const CreateMeetingModal = ({ onClose, onCreate }) => {
     };
 
     const handleCreate = () => {
-        if (!form.title || !form.date || !form.time) return;
+        if (!form.title || !form.date || !form.time || form.targetRoles.length === 0) {
+            return;
+        }
+
+        const participantNames = recipients
+            .filter((recipient) => form.targetRoles.includes(recipient.role))
+            .map((recipient) => recipient.name);
 
         onCreate({
             id: Date.now(),
             title: form.title,
             datetime: `${form.date} at ${formatTime12(form.time)}`,
-            participants: form.interns,
+            participants: participantNames,
             status: "Scheduled",
+            date: form.date,
+            time: formatTime12(form.time),
+            duration: "30 min",
+            platform: "EMS Meet",
+            link: "#",
+            description: form.description,
+            targetRoles: form.targetRoles,
         });
 
         onClose();
@@ -60,22 +74,22 @@ const CreateMeetingModal = ({ onClose, onCreate }) => {
                     }
                 />
 
-                {/* Select Interns */}
+                {/* Select Recipients */}
                 <div className="space-y-2">
-                    <p className="text-sm font-medium">Select Interns</p>
+                    <p className="text-sm font-medium">Select Target Panels</p>
                     <div className="flex flex-wrap gap-2">
-                        {interns.map((i) => (
+                        {recipients.map((recipient) => (
                             <button
-                                key={i.id}
+                                key={recipient.id}
                                 type="button"
-                                onClick={() => toggleIntern(i.name)}
+                                onClick={() => toggleRecipient(recipient.role)}
                                 className={`rounded-full border px-3 py-1 text-sm ${
-                                    form.interns.includes(i.name)
+                                    form.targetRoles.includes(recipient.role)
                                         ? "bg-indigo-100 border-indigo-500 text-indigo-600"
                                         : "border-slate-300"
                                 }`}
                             >
-                                {i.name}
+                                {recipient.name}
                             </button>
                         ))}
                     </div>

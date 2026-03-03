@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   Search,
   Send,
@@ -8,6 +8,7 @@ import {
   MoreVertical,
   File,
 } from "lucide-react";
+import { getSharedTechSupportMessages } from "../../utils/techSupportStore";
 
 const people = {
   members: [
@@ -46,6 +47,12 @@ const people = {
     role: "Group Chat",
     avatar: "https://ui-avatars.com/api/?name=DG",
   },
+  techSupport: {
+    id: "tech-support",
+    name: "Tech Support Feed",
+    role: "Shared Inbox",
+    avatar: "https://ui-avatars.com/api/?name=TS&background=0ea5e9&color=fff",
+  },
 };
 
 const initialMessages = {
@@ -55,12 +62,29 @@ const initialMessages = {
 const CfoDepartmentChat = () => {
   const [activeChat, setActiveChat] = useState(people.members[0]);
   const [messages, setMessages] = useState(initialMessages);
+  const [sharedTechSupportMessages, setSharedTechSupportMessages] = useState([]);
   const [input, setInput] = useState("");
   const [groupMembers, setGroupMembers] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const fileInputRef = useRef(null);
 
-  const currentMessages = messages[activeChat.id] || [];
+  useEffect(() => {
+    setSharedTechSupportMessages(getSharedTechSupportMessages());
+
+    const onStorage = (event) => {
+      if (event.key === "ems_shared_tech_support_messages") {
+        setSharedTechSupportMessages(getSharedTechSupportMessages());
+      }
+    };
+
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
+
+  const currentMessages =
+    activeChat.id === "tech-support"
+      ? sharedTechSupportMessages
+      : messages[activeChat.id] || [];
 
   const sendMessage = () => {
     if (!input.trim()) return;
@@ -204,6 +228,32 @@ const CfoDepartmentChat = () => {
                   className={`text-[10px] truncate uppercase font-medium ${activeChat.id === people.group.id ? "text-blue-100" : "text-slate-500"}`}
                 >
                   {people.group.role}
+                </div>
+              </div>
+            </button>
+            <button
+              onClick={() => setActiveChat(people.techSupport)}
+              className={`w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-all ${
+                activeChat.id === people.techSupport.id
+                  ? "bg-blue-600 text-white shadow-md shadow-blue-200"
+                  : "hover:bg-slate-200 text-slate-700"
+              }`}
+            >
+              <div className="relative flex-shrink-0">
+                <img
+                  src={people.techSupport.avatar}
+                  alt=""
+                  className="h-9 w-9 rounded-full object-cover border border-white/20"
+                />
+              </div>
+              <div className="flex-1 overflow-hidden">
+                <div className="text-sm font-semibold truncate leading-tight">
+                  {people.techSupport.name}
+                </div>
+                <div
+                  className={`text-[10px] truncate uppercase font-medium ${activeChat.id === people.techSupport.id ? "text-blue-100" : "text-slate-500"}`}
+                >
+                  {people.techSupport.role}
                 </div>
               </div>
             </button>
