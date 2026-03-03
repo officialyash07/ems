@@ -46,18 +46,18 @@ const managerData = {
       description: "Daily standups & progress",
       type: "channel",
     },
-    {
-      id: "intern-coordination",
-      name: "Intern Coordination",
-      description: "Task assignment & reviews",
-      type: "channel",
-    },
-    {
-      id: "project-escalations",
-      name: "Project Escalations",
-      description: "High priority issues only",
-      type: "channel",
-    },
+    // {
+    //   id: "intern-coordination",
+    //   name: "Intern Coordination",
+    //   description: "Task assignment & reviews",
+    //   type: "channel",
+    // },
+    // {
+    //   id: "project-escalations",
+    //   name: "Project Escalations",
+    //   description: "High priority issues only",
+    //   type: "channel",
+    // },
     {
       id: "tech-support",
       name: "Tech Support",
@@ -150,7 +150,9 @@ const initialMessages = {
 const ManagerDepartmentChat = () => {
   const [activeChat, setActiveChat] = useState(managerData.channels[0]);
   const [messages, setMessages] = useState(initialMessages);
-  const [sharedTechSupportMessages, setSharedTechSupportMessages] = useState([]);
+  const [sharedTechSupportMessages, setSharedTechSupportMessages] = useState(
+    [],
+  );
   const [input, setInput] = useState("");
   const fileInputRef = useRef(null);
 
@@ -282,7 +284,7 @@ const ManagerDepartmentChat = () => {
           </div>
 
           {/* Team Groups Section */}
-          <div className="px-4 py-2 text-[10px] font-bold text-slate-400 flex items-center gap-1 uppercase tracking-widest">
+          {/* <div className="px-4 py-2 text-[10px] font-bold text-slate-400 flex items-center gap-1 uppercase tracking-widest">
             <ChevronDown size={12} /> Team Groups
           </div>
           <div className="mt-1 space-y-1 px-2 mb-4">
@@ -315,10 +317,10 @@ const ManagerDepartmentChat = () => {
                 </div>
               </button>
             ))}
-          </div>
+          </div> */}
 
           {/* Direct Reports Section (Individual) */}
-          <div className="px-4 py-2 text-[10px] font-bold text-slate-400 flex items-center gap-1 uppercase tracking-widest">
+          {/* <div className="px-4 py-2 text-[10px] font-bold text-slate-400 flex items-center gap-1 uppercase tracking-widest">
             <ChevronDown size={12} /> Direct Reports
           </div>
           <div className="mt-1 space-y-1 px-2 pb-6">
@@ -356,7 +358,7 @@ const ManagerDepartmentChat = () => {
                 </div>
               </button>
             ))}
-          </div>
+          </div> */}
         </div>
       </div>
 
