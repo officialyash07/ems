@@ -18,12 +18,14 @@ import {
 /* INTERN DEPARTMENT DATA */
 const internData = {
   channels: [
+    /*
     {
       id: "general",
       name: "General Chat",
       description: "Main department discussion",
       type: "channel",
     },
+    */
     {
       id: "announcements",
       name: "Announcements",
@@ -36,12 +38,14 @@ const internData = {
       description: "Help with tools & infra",
       type: "channel",
     },
+    /*
     {
       id: "random",
       name: "Random",
       description: "Coffee breaks & fun",
       type: "channel",
     },
+    */
   ],
   group: {
     id: "intern-dept-group",
@@ -96,7 +100,9 @@ const InternDepartmentChat = () => {
   const [activeChat, setActiveChat] = useState(internData.channels[0]);
   const [messages, setMessages] = useState(initialMessages);
   const [sharedAnnouncements, setSharedAnnouncements] = useState([]);
-  const [sharedTechSupportMessages, setSharedTechSupportMessages] = useState([]);
+  const [sharedTechSupportMessages, setSharedTechSupportMessages] = useState(
+    [],
+  );
   const [input, setInput] = useState("");
   const fileInputRef = useRef(null);
 
@@ -238,6 +244,7 @@ const InternDepartmentChat = () => {
           </div>
 
           {/* Department Group Section (Replaces Mentors) */}
+          {/*
           <div className="px-4 py-2 text-[10px] font-bold text-slate-400 flex items-center gap-1 uppercase tracking-widest">
             <ChevronDown size={12} /> Team Groups
           </div>
@@ -269,6 +276,7 @@ const InternDepartmentChat = () => {
               </div>
             </button>
           </div>
+          */}
         </div>
       </div>
 
@@ -366,7 +374,8 @@ const InternDepartmentChat = () => {
         <div className="border-t border-gray-200 px-6 py-5 bg-white">
           {isAnnouncementsChannel ? (
             <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-              Announcements are read-only for interns. Messages here are posted by Team Lead and TL Intern.
+              Announcements are read-only for interns. Messages here are posted
+              by Team Lead and TL Intern.
             </div>
           ) : null}
           <div className="flex items-center gap-3 bg-slate-50 rounded-2xl border border-gray-200 p-2 focus-within:border-blue-400 focus-within:ring-4 ring-blue-500/5 transition-all">
