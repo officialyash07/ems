@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   Search,
   Send,
@@ -9,6 +9,14 @@ import {
   MoreVertical,
   File,
 } from "lucide-react";
+import {
+  addSharedAnnouncement,
+  getSharedAnnouncements,
+} from "../../utils/announcementsStore";
+import {
+  addSharedTechSupportMessage,
+  getSharedTechSupportMessages,
+} from "../../utils/techSupportStore";
 
 /* TEAM LEAD DATA */
 const tlData = {
@@ -29,6 +37,12 @@ const tlData = {
       id: "code-reviews",
       name: "Code Reviews",
       description: "PRs & technical discussions",
+      type: "channel",
+    },
+    {
+      id: "tech-support",
+      name: "Tech Support",
+      description: "Help with tools & infra",
       type: "channel",
     },
     {
@@ -102,19 +116,66 @@ const initialMessages = {
   ],
   "frontend-team": [],
   "backend-team": [],
+  "tech-support": [],
   announcements: [],
 };
 
 const TlDepartmentChat = () => {
   const [activeChat, setActiveChat] = useState(tlData.channels[0]);
   const [messages, setMessages] = useState(initialMessages);
+  const [sharedAnnouncements, setSharedAnnouncements] = useState([]);
+  const [sharedTechSupportMessages, setSharedTechSupportMessages] = useState([]);
   const [input, setInput] = useState("");
   const fileInputRef = useRef(null);
 
-  const currentMessages = messages[activeChat.id] || [];
+  useEffect(() => {
+    setSharedAnnouncements(getSharedAnnouncements());
+    setSharedTechSupportMessages(getSharedTechSupportMessages());
+
+    const onStorage = (event) => {
+      if (event.key === "ems_shared_announcements") {
+        setSharedAnnouncements(getSharedAnnouncements());
+      }
+      if (event.key === "ems_shared_tech_support_messages") {
+        setSharedTechSupportMessages(getSharedTechSupportMessages());
+      }
+    };
+
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
+
+  const currentMessages =
+    activeChat.id === "announcements"
+      ? sharedAnnouncements
+      : activeChat.id === "tech-support"
+        ? sharedTechSupportMessages
+        : messages[activeChat.id] || [];
 
   const sendMessage = () => {
     if (!input.trim()) return;
+
+    if (activeChat.id === "announcements") {
+      const createdAnnouncement = addSharedAnnouncement({
+        from: "Team Lead",
+        text: input,
+        sourceRole: "team_lead",
+      });
+      setSharedAnnouncements((prev) => [...prev, createdAnnouncement]);
+      setInput("");
+      return;
+    }
+
+    if (activeChat.id === "tech-support") {
+      const createdMessage = addSharedTechSupportMessage({
+        from: "Team Lead",
+        text: input,
+        sourceRole: "team_lead",
+      });
+      setSharedTechSupportMessages((prev) => [...prev, createdMessage]);
+      setInput("");
+      return;
+    }
 
     const newMessage = {
       from: "You",

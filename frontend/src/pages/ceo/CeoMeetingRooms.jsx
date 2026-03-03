@@ -19,67 +19,174 @@ const CeoMeetingRooms = () => {
   const [micOn, setMicOn] = useState(true);
   const [cameraOn, setCameraOn] = useState(true);
   const [recording, setRecording] = useState(false);
+  const [mediaError, setMediaError] = useState("");
+  const [isScreenSharing, setIsScreenSharing] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatInput, setChatInput] = useState("");
+  const [messages, setMessages] = useState([
+    { id: 1, sender: "System", text: "Welcome to the meeting chat." },
+  ]);
 
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
   const streamRef = useRef(null);
   const videoRef = useRef(null);
 
-  // 🎥 Get camera + mic stream
+  const stopCurrentStream = () => {
+    streamRef.current?.getTracks().forEach((track) => track.stop());
+  };
+
+  const requestMedia = async ({ audio = true, video = true } = {}) => {
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setMediaError("Media devices are not supported in this browser.");
+      setMicOn(false);
+      setCameraOn(false);
+      return null;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio, video });
+      stopCurrentStream();
+      streamRef.current = stream;
+
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+
+      setMicOn(stream.getAudioTracks().length > 0);
+      setCameraOn(stream.getVideoTracks().length > 0);
+      setMediaError("");
+      return stream;
+    } catch (error) {
+      setMediaError("Camera/Microphone permission is blocked. Please allow access in browser site settings.");
+      setMicOn(false);
+      setCameraOn(false);
+      return null;
+    }
+  };
+
+  const toggleMic = () => {
+    if (!streamRef.current) {
+      requestMedia({ audio: true, video: cameraOn });
+      return;
+    }
+
+    const audioTracks = streamRef.current.getAudioTracks();
+    if (audioTracks.length === 0 && !micOn) {
+      requestMedia({ audio: true, video: cameraOn });
+      return;
+    }
+
+    const nextMicOn = !micOn;
+    audioTracks.forEach((track) => (track.enabled = nextMicOn));
+    setMicOn(nextMicOn);
+  };
+
+  const toggleCamera = () => {
+    if (!streamRef.current) {
+      requestMedia({ audio: micOn, video: true });
+      return;
+    }
+
+    const videoTracks = streamRef.current.getVideoTracks();
+    if (videoTracks.length === 0 && !cameraOn) {
+      requestMedia({ audio: micOn, video: true });
+      return;
+    }
+
+    const nextCameraOn = !cameraOn;
+    videoTracks.forEach((track) => (track.enabled = nextCameraOn));
+    setCameraOn(nextCameraOn);
+  };
+
+  const stopScreenShare = async () => {
+    setIsScreenSharing(false);
+    stopCurrentStream();
+    await requestMedia({ audio: true, video: true });
+  };
+
+  const toggleScreenShare = async () => {
+    if (isScreenSharing) {
+      await stopScreenShare();
+      return;
+    }
+
+    if (!navigator.mediaDevices?.getDisplayMedia) {
+      setMediaError("Screen sharing is not supported in this browser.");
+      return;
+    }
+
+    try {
+      const displayStream = await navigator.mediaDevices.getDisplayMedia({
+        video: true,
+        audio: false,
+      });
+
+      stopCurrentStream();
+      streamRef.current = displayStream;
+
+      const [screenTrack] = displayStream.getVideoTracks();
+      if (screenTrack) {
+        screenTrack.onended = () => {
+          stopScreenShare();
+        };
+      }
+
+      if (videoRef.current) {
+        videoRef.current.srcObject = displayStream;
+      }
+
+      setIsScreenSharing(true);
+      setMediaError("");
+    } catch (error) {
+      setMediaError("Screen sharing was cancelled or blocked.");
+    }
+  };
+
+  const sendMessage = () => {
+    const trimmedMessage = chatInput.trim();
+    if (!trimmedMessage) {
+      return;
+    }
+
+    setMessages((prevMessages) => [
+      ...prevMessages,
+      { id: Date.now(), sender: "You", text: trimmedMessage },
+    ]);
+    setChatInput("");
+  };
+
+  // Get camera + mic stream
   useEffect(() => {
     const getMedia = async () => {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: true,
-          audio: true,
-        });
-
-        streamRef.current = stream;
-
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-        }
-      } catch (err) {
-        console.error("Error accessing media devices:", err);
-      }
+      await requestMedia({ video: true, audio: true });
     };
 
     getMedia();
 
     return () => {
-      streamRef.current?.getTracks().forEach((track) => track.stop());
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+        mediaRecorderRef.current.stop();
+      }
+      stopCurrentStream();
     };
   }, []);
 
-  // 🎙 Mic Toggle
-  const toggleMic = () => {
-    if (!streamRef.current) return;
+  // Start Recording
+  const startRecording = async () => {
+    let stream = streamRef.current;
 
-    streamRef.current.getAudioTracks().forEach((track) => {
-      track.enabled = !micOn;
-    });
+    if (!stream) {
+      stream = await requestMedia({ audio: true, video: true });
+    }
 
-    setMicOn(!micOn);
-  };
-
-  // 📹 Camera Toggle
-  const toggleCamera = () => {
-    if (!streamRef.current) return;
-
-    streamRef.current.getVideoTracks().forEach((track) => {
-      track.enabled = !cameraOn;
-    });
-
-    setCameraOn(!cameraOn);
-  };
-
-  // 🔴 Start Recording
-  const startRecording = () => {
-    if (!streamRef.current) return;
+    if (!stream) {
+      return;
+    }
 
     chunksRef.current = [];
 
-    const mediaRecorder = new MediaRecorder(streamRef.current);
+    const mediaRecorder = new MediaRecorder(stream);
     mediaRecorderRef.current = mediaRecorder;
 
     mediaRecorder.ondataavailable = (event) => {
@@ -104,9 +211,9 @@ const CeoMeetingRooms = () => {
     setRecording(true);
   };
 
-  // ⛔ Stop Recording
+  // Stop Recording
   const stopRecording = () => {
-    if (mediaRecorderRef.current) {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
       mediaRecorderRef.current.stop();
     }
     setRecording(false);
@@ -121,7 +228,10 @@ const CeoMeetingRooms = () => {
       </div>
 
       {/* Video Area */}
-      <div className="flex-1 flex items-center justify-center">
+      <div className="flex-1 flex items-center justify-center relative">
+        {mediaError ? (
+          <p className="text-red-400 text-sm mb-4 absolute text-center px-4">{mediaError}</p>
+        ) : null}
         <video
           ref={videoRef}
           autoPlay
@@ -129,6 +239,37 @@ const CeoMeetingRooms = () => {
           playsInline
           className="bg-black w-3/4 h-3/4 rounded-xl"
         />
+
+        {isChatOpen ? (
+          <div className="absolute right-4 top-4 bottom-4 w-80 bg-gray-800 border border-gray-700 rounded-lg flex flex-col">
+            <div className="p-3 border-b border-gray-700 font-medium">Meeting Chat</div>
+            <div className="flex-1 overflow-y-auto p-3 space-y-2">
+              {messages.map((message) => (
+                <div key={message.id} className="text-sm">
+                  <span className="text-blue-300 mr-2">{message.sender}:</span>
+                  <span>{message.text}</span>
+                </div>
+              ))}
+            </div>
+            <div className="p-3 border-t border-gray-700 flex gap-2">
+              <input
+                type="text"
+                value={chatInput}
+                onChange={(event) => setChatInput(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    sendMessage();
+                  }
+                }}
+                placeholder="Type a message"
+                className="flex-1 bg-gray-900 border border-gray-700 rounded px-2 py-1 text-sm outline-none"
+              />
+              <button onClick={sendMessage} className="px-3 py-1 text-sm bg-blue-600 rounded">
+                Send
+              </button>
+            </div>
+          </div>
+        ) : null}
       </div>
 
       {/* Controls */}
@@ -141,11 +282,11 @@ const CeoMeetingRooms = () => {
           {cameraOn ? <Video /> : <VideoOff />}
         </button>
 
-        <button>
+        <button onClick={() => setIsChatOpen((prevState) => !prevState)}>
           <MessageSquare />
         </button>
 
-        {/* 🔴 Record */}
+        {/* RECORD BUTTON */}
         <button onClick={recording ? stopRecording : startRecording}>
           <Circle className={recording ? "text-red-500 animate-pulse" : ""} />
         </button>
@@ -167,8 +308,8 @@ const CeoMeetingRooms = () => {
           <Flag />
         </button>
 
-        <button>
-          <ScreenShare />
+        <button onClick={toggleScreenShare}>
+          <ScreenShare className={isScreenSharing ? "text-green-400" : ""} />
         </button>
       </div>
     </div>

@@ -37,11 +37,19 @@ const CreateMeetingModal = ({ onClose, onCreate }) => {
     const handleCreate = () => {
         if (!form.title || !form.date || !form.time) return;
 
+        const formattedTime = formatTime12(form.time);
+
         onCreate({
             title: form.title,
-            datetime: `${form.date} at ${formatTime12(form.time)}`,
+            datetime: `${form.date} at ${formattedTime}`,
             participants: form.interns,
             status: "Scheduled",
+            date: form.date,
+            time: formattedTime,
+            duration: "30 min",
+            platform: "EMS Meet",
+            link: "#",
+            description: form.description,
         });
 
         onClose();

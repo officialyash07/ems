@@ -1,6 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import MeetingsCard from "../../components/manager_intern/MeetingsCard";
 import CreateMeetingsModal from "../../components/manager_intern/CreateMeetingsModal";
+import {
+    getMeetingsForRole,
+} from "../../utils/meetingsStore";
 
 const Manager_internMeetings = () => {
     const [showModal, setShowModal] = useState(false);
@@ -21,15 +24,11 @@ const Manager_internMeetings = () => {
         },
     ]);
 
-    const Manager_internMeetings = [
-        { 
-            id: "meeting-123",
-            title: "Team Lead Monthly Sync",
-            datetime: "Tue, Dec 30, 2025 at 11:00 AM",
-            participants: ["All Team Leads", "Michael B. (Manager)"],
-            status: "Scheduled",
-        },
-    ];
+    const [managerMeetings, setManagerMeetings] = useState([]);
+
+    useEffect(() => {
+        setManagerMeetings(getMeetingsForRole("manager_intern", ["manager"]));
+    }, []);
 
     const handleCreateMeeting = (newMeeting) => {
         setMyMeetings((prev) => [newMeeting, ...prev]);
@@ -62,13 +61,17 @@ const Manager_internMeetings = () => {
             {/* Scheduled by Manager */}
             <section className="space-y-4">
                 <h2 className="font-medium text-lg">
-                    Meetings Scheduled by Manager-intern
+                    Meetings Scheduled by Manager
                 </h2>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {Manager_internMeetings.map((m, i) => (
-                        <MeetingsCard key={i} meeting={m} />
-                    ))}
+                    {managerMeetings.length > 0 ? (
+                        managerMeetings.map((m) => (
+                            <MeetingsCard key={m.id} meeting={m} />
+                        ))
+                    ) : (
+                        <p className="text-sm text-slate-500">No meetings scheduled by Manager.</p>
+                    )}
                 </div>
             </section>
 

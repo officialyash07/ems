@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   Search,
   Send,
@@ -9,6 +9,10 @@ import {
   MoreVertical,
   File,
 } from "lucide-react";
+import {
+  addSharedTechSupportMessage,
+  getSharedTechSupportMessages,
+} from "../../utils/techSupportStore";
 
 /* MANAGER DATA */
 const managerData = {
@@ -52,6 +56,12 @@ const managerData = {
       id: "project-escalations",
       name: "Project Escalations",
       description: "High priority issues only",
+      type: "channel",
+    },
+    {
+      id: "tech-support",
+      name: "Tech Support",
+      description: "Help with tools & infra",
       type: "channel",
     },
     {
@@ -125,6 +135,7 @@ const initialMessages = {
   ],
   "backend-interns": [],
   "project-escalations": [],
+  "tech-support": [],
   announcements: [
     {
       from: "CTO Office",
@@ -139,13 +150,41 @@ const initialMessages = {
 const ManagerDepartmentChat = () => {
   const [activeChat, setActiveChat] = useState(managerData.channels[0]);
   const [messages, setMessages] = useState(initialMessages);
+  const [sharedTechSupportMessages, setSharedTechSupportMessages] = useState([]);
   const [input, setInput] = useState("");
   const fileInputRef = useRef(null);
 
-  const currentMessages = messages[activeChat.id] || [];
+  useEffect(() => {
+    setSharedTechSupportMessages(getSharedTechSupportMessages());
+
+    const onStorage = (event) => {
+      if (event.key === "ems_shared_tech_support_messages") {
+        setSharedTechSupportMessages(getSharedTechSupportMessages());
+      }
+    };
+
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
+
+  const currentMessages =
+    activeChat.id === "tech-support"
+      ? sharedTechSupportMessages
+      : messages[activeChat.id] || [];
 
   const sendMessage = () => {
     if (!input.trim()) return;
+
+    if (activeChat.id === "tech-support") {
+      const createdMessage = addSharedTechSupportMessage({
+        from: "Manager",
+        text: input,
+        sourceRole: "manager",
+      });
+      setSharedTechSupportMessages((prev) => [...prev, createdMessage]);
+      setInput("");
+      return;
+    }
 
     const newMessage = {
       from: "You",

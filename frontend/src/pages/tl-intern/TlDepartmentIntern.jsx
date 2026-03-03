@@ -4,6 +4,14 @@ import { Send } from "lucide-react";
 
 import Avatar from "../../components/tl-panel/Avatar";
 import MessageBubble from "../../components/tl-panel/MessageBubble";
+import {
+  addSharedAnnouncement,
+  getSharedAnnouncements,
+} from "../../utils/announcementsStore";
+import {
+  addSharedTechSupportMessage,
+  getSharedTechSupportMessages,
+} from "../../utils/techSupportStore";
 
 const members = [
   {
@@ -30,6 +38,8 @@ const initialMessages = {
 const TlDepartmentChat = () => {
   const [activeMember, setActiveMember] = useState(members[0]);
   const [messages, setMessages] = useState(initialMessages);
+  const [sharedAnnouncements, setSharedAnnouncements] = useState([]);
+  const [sharedTechSupportMessages, setSharedTechSupportMessages] = useState([]);
   const [input, setInput] = useState("");
 
   const messagesEndRef = useRef(null);
@@ -38,8 +48,47 @@ const TlDepartmentChat = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [activeMember, messages]);
 
+  useEffect(() => {
+    setSharedAnnouncements(getSharedAnnouncements());
+    setSharedTechSupportMessages(getSharedTechSupportMessages());
+
+    const onStorage = (event) => {
+      if (event.key === "ems_shared_announcements") {
+        setSharedAnnouncements(getSharedAnnouncements());
+      }
+      if (event.key === "ems_shared_tech_support_messages") {
+        setSharedTechSupportMessages(getSharedTechSupportMessages());
+      }
+    };
+
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
+
   const handleSend = () => {
     if (!input.trim()) return;
+
+    if (activeMember.id === "announcements") {
+      const createdAnnouncement = addSharedAnnouncement({
+        from: "TL Intern",
+        text: input,
+        sourceRole: "team_lead_intern",
+      });
+      setSharedAnnouncements((prev) => [...prev, createdAnnouncement]);
+      setInput("");
+      return;
+    }
+
+    if (activeMember.id === "tech_support") {
+      const createdMessage = addSharedTechSupportMessage({
+        from: "TL Intern",
+        text: input,
+        sourceRole: "team_lead_intern",
+      });
+      setSharedTechSupportMessages((prev) => [...prev, createdMessage]);
+      setInput("");
+      return;
+    }
 
     setMessages((prev) => ({
       ...prev,
@@ -94,12 +143,22 @@ const TlDepartmentChat = () => {
 
         {/* Messages */}
         <div className="flex-1 overflow-y-auto bg-slate-50 p-6 space-y-4">
-          {(messages[activeMember.id] || []).length === 0 ? (
+          {(activeMember.id === "announcements"
+            ? sharedAnnouncements
+            : activeMember.id === "tech_support"
+              ? sharedTechSupportMessages
+            : messages[activeMember.id] || []
+          ).length === 0 ? (
             <p className="text-center text-slate-400 text-sm">
               No messages yet
             </p>
           ) : (
-            messages[activeMember.id].map((msg, idx) => (
+            (activeMember.id === "announcements"
+              ? sharedAnnouncements
+              : activeMember.id === "tech_support"
+                ? sharedTechSupportMessages
+              : messages[activeMember.id] || []
+            ).map((msg, idx) => (
               <MessageBubble key={idx} msg={msg} />
             ))
           )}

@@ -55,8 +55,10 @@ const TlDashboard = () => {
             try {
                 // Get all submissions and filter for pending status
                 const submissionsData = [];
-                for (const task of allTasks) {
-                    const taskSubmissions = await submissionsApi.getByTask(task.id);
+                const tasksWithIds = allTasks.filter((task) => Boolean(task.id || task._id));
+                for (const task of tasksWithIds) {
+                    const taskId = task.id || task._id;
+                    const taskSubmissions = await submissionsApi.getByTask(taskId);
                     submissionsData.push(...taskSubmissions);
                 }
                 pendingSubmissions = submissionsData.filter(
@@ -117,7 +119,7 @@ const TlDashboard = () => {
             )
             .slice(0, 5)
             .map((task, index) => ({
-                id: task.id,
+                id: task.id || task._id || `activity-${index}`,
                 time: new Date(task.updatedAt || task.createdAt).toLocaleTimeString("en-US", {
                     hour: "numeric",
                     minute: "2-digit",

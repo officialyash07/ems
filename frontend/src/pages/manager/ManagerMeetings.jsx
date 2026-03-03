@@ -1,38 +1,22 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import MeetingCard from "../../components/manager/MeetingCard";
 import CreateMeetingModal from "../../components/manager/CreateMeetingModal";
+import {
+    addMeetingToStore,
+    getMeetingsByCreator,
+} from "../../utils/meetingsStore";
 
 const Meetings = () => {
     const [showModal, setShowModal] = useState(false);
+    const [myMeetings, setMyMeetings] = useState([]);
 
-    const [myMeetings, setMyMeetings] = useState([
-        {   
-            id: "meeting-121",
-            title: "Weekly Sync - Interns Group A",
-            datetime: "Mon, Dec 29, 2025 at 10:00 AM",
-            participants: ["John S.", "Sarah L.", "Emily C."],
-            status: "Scheduled",
-        },
-        {   id: "meeting-122", 
-            title: "1-on-1 with David Lee",
-            datetime: "Mon, Dec 29, 2025 at 1:30 PM",
-            participants: ["David Lee"],
-            status: "Ongoing",
-        },
-    ]);
-
-    const managerMeetings = [
-        { 
-            id: "meeting-123",
-            title: "Team Lead Monthly Sync",
-            datetime: "Tue, Dec 30, 2025 at 11:00 AM",
-            participants: ["All Team Leads", "Michael B. (Manager)"],
-            status: "Scheduled",
-        },
-    ];
+    useEffect(() => {
+        setMyMeetings(getMeetingsByCreator("manager"));
+    }, []);
 
     const handleCreateMeeting = (newMeeting) => {
-        setMyMeetings((prev) => [newMeeting, ...prev]);
+        const createdMeeting = addMeetingToStore(newMeeting, "manager");
+        setMyMeetings((prev) => [createdMeeting, ...prev]);
     };
 
     return (
@@ -54,19 +38,6 @@ const Meetings = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {myMeetings.map((m, i) => (
-                        <MeetingCard key={i} meeting={m} />
-                    ))}
-                </div>
-            </section>
-
-            {/* Scheduled by Manager */}
-            <section className="space-y-4">
-                <h2 className="font-medium text-lg">
-                    Meetings Scheduled by Manager
-                </h2>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {managerMeetings.map((m, i) => (
                         <MeetingCard key={i} meeting={m} />
                     ))}
                 </div>

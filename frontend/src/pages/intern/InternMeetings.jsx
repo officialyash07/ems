@@ -1,36 +1,19 @@
+import { useEffect, useState } from "react";
 import MeetingRow from "../../components/intern/MeetingRow";
-
-const meetings = [
-    {
-        id: 1,
-        title: "Daily Standup",
-        date: "Feb 18, 2026",
-        time: "10:00 AM",
-        duration: "15 min",
-        platform: "Google Meet",
-        link: "#",
-    },
-    {
-        id: 2,
-        title: "UI Review with Team Lead",
-        date: "Feb 18, 2026",
-        time: "2:00 PM",
-        duration: "30 min",
-        platform: "Zoom",
-        link: "#",
-    },
-    {
-        id: 3,
-        title: "Weekly Sync",
-        date: "Feb 19, 2026",
-        time: "11:00 AM",
-        duration: "1 hr",
-        platform: "Microsoft Teams",
-        link: "#",
-    },
-];
+import { getMeetingsByCreators, getMeetingsForRole } from "../../utils/meetingsStore";
 
 const InternMeetings = () => {
+    const [meetings, setMeetings] = useState([]);
+
+    useEffect(() => {
+        const leadMeetings = getMeetingsByCreators([
+            "team_lead",
+            "team_lead_intern",
+        ]);
+        const managerMeetings = getMeetingsForRole("intern", ["manager"]);
+        setMeetings([...leadMeetings, ...managerMeetings]);
+    }, []);
+
     return (
         <div className="space-y-6">
             {/* Header */}
@@ -52,9 +35,15 @@ const InternMeetings = () => {
                 </div>
 
                 <div className="divide-y divide-gray-300">
-                    {meetings.map((meeting) => (
-                        <MeetingRow key={meeting.id} meeting={meeting} />
-                    ))}
+                    {meetings.length > 0 ? (
+                        meetings.map((meeting) => (
+                            <MeetingRow key={meeting.id} meeting={meeting} />
+                        ))
+                    ) : (
+                        <div className="p-5 text-sm text-slate-500">
+                            No meetings available yet.
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

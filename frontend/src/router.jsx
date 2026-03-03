@@ -23,6 +23,7 @@ import TlInternTask from "./pages/tl-panel/TlTask";
 import TlSubmissionsReview from "./pages/tl-panel/TlSubmissionsReview";
 import TlMeetings from "./pages/tl-panel/TlMeetings";
 import TlDepartmentChat from "./pages/tl-panel/TlDepartmentChat";
+import TlMeetingRoom from "./pages/tl-panel/TlMeetingRoom";
 
 /*Team Lead Intern Pages */
 import TlDashboardIntern from "./pages/tl-intern/TlDashboardIntern";
@@ -134,6 +135,7 @@ export const router = createBrowserRouter([
             { path: "reviews", element: <TlSubmissionsReview /> },
             { path: "meetings", element: <TlMeetings /> },
             { path: "chat", element: <TlDepartmentChat /> },
+          { path: "tl-meeting-room/:id", element: <TlMeetingRoom /> },
         ],
     },
 
