@@ -96,6 +96,10 @@ const initialMessages = {
   random: [],
 };
 
+/**
+ * Communication portal for the intern department.
+ * Facilitates access to announcements, technical support, and group discussions.
+ */
 const InternDepartmentChat = () => {
   const [activeChat, setActiveChat] = useState(internData.channels[0]);
   const [messages, setMessages] = useState(initialMessages);
@@ -132,6 +136,10 @@ const InternDepartmentChat = () => {
       ? sharedTechSupportMessages
       : messages[activeChat.id] || [];
 
+  /**
+   * Dispatches messages to the active channel or tech support stream.
+   * Interns have read-only access to announcements.
+   */
   const sendMessage = () => {
     if (isAnnouncementsChannel) return;
     if (!input.trim()) return;
@@ -165,6 +173,12 @@ const InternDepartmentChat = () => {
     setInput("");
   };
 
+  /**
+   * Processes local file selection to share within the chat stream.
+   * Generates a temporary blob URL for immediate visibility.
+   *
+   * @param {Event} e - HTML input change event
+   */
   const handleFileUpload = (e) => {
     if (isAnnouncementsChannel) return;
     const file = e.target.files[0];

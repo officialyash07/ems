@@ -29,47 +29,53 @@ const initialData = [
   },
 ];
 
+/**
+ * Review interface for manager-interns to evaluate peer submissions.
+ * Facilitates status updates and collaborative feedback.
+ */
 const Manager_internSubmissionsReview = () => {
   const [submissions, setSubmissions] = useState(initialData);
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
 
   // Approve / Reject
+  /**
+   * Updates the lifecycle status of a specific submission.
+   *
+   * @param {number|string} id - Submission ID
+   * @param {string} status - Target status
+   */
   const handleStatusChange = (id, status) => {
     setSubmissions((prev) =>
       prev.map((item) =>
-        item.id === id
-          ? { ...item, status, reviewer: currentUser.role }
-          : item
-      )
+        item.id === id ? { ...item, status, reviewer: currentUser.role } : item,
+      ),
     );
   };
 
   // Add Comment
+  /**
+   * Records a new text comment against a submission record.
+   *
+   * @param {number|string} id - Submission ID
+   * @param {string} text - Comment content
+   */
   const handleAddComment = (id, text) => {
     setSubmissions((prev) =>
       prev.map((item) =>
-        item.id === id
-          ? { ...item, comments: [...item.comments, text] }
-          : item
-      )
+        item.id === id ? { ...item, comments: [...item.comments, text] } : item,
+      ),
     );
   };
 
   // Filter + Search
   const filteredData = submissions
-    .filter((s) =>
-      s.intern.toLowerCase().includes(search.toLowerCase())
-    )
-    .filter((s) =>
-      filterStatus === "all" ? true : s.status === filterStatus
-    );
+    .filter((s) => s.intern.toLowerCase().includes(search.toLowerCase()))
+    .filter((s) => (filterStatus === "all" ? true : s.status === filterStatus));
 
   return (
     <div className="space-y-6 p-6">
-      <h1 className="text-2xl font-semibold">
-        Intern Submissions Review
-      </h1>
+      <h1 className="text-2xl font-semibold">Intern Submissions Review</h1>
 
       {/* Search + Filter */}
       <div className="flex gap-4">
@@ -101,40 +107,30 @@ const Manager_internSubmissionsReview = () => {
               <div>
                 <p className="font-semibold">{item.intern}</p>
                 <p>{item.task}</p>
-                <p className="text-sm text-gray-500">
-                  {item.submittedOn}
-                </p>
+                <p className="text-sm text-gray-500">{item.submittedOn}</p>
                 <p className="text-sm">
-                  Status:{" "}
-                  <span className="font-medium">
-                    {item.status}
-                  </span>
+                  Status: <span className="font-medium">{item.status}</span>
                 </p>
               </div>
 
               {/* Role-based Buttons */}
-              {currentUser.role !== "Intern" &&
-                item.status === "pending" && (
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() =>
-                        handleStatusChange(item.id, "approved")
-                      }
-                      className="bg-green-500 hover:bg-green-600 text-white h-6 px-2 text-[13px] rounded"
-                    >
-                      Approve
-                    </button>
+              {currentUser.role !== "Intern" && item.status === "pending" && (
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleStatusChange(item.id, "approved")}
+                    className="bg-green-500 hover:bg-green-600 text-white h-6 px-2 text-[13px] rounded"
+                  >
+                    Approve
+                  </button>
 
-                    <button
-                      onClick={() =>
-                        handleStatusChange(item.id, "rejected")
-                      }
-                     className="bg-red-500 hover:bg-red-600 text-white h-6 px-2 text-[13px] rounded"
-                    >
-                      Reject
-                    </button>
-                  </div>
-                )}
+                  <button
+                    onClick={() => handleStatusChange(item.id, "rejected")}
+                    className="bg-red-500 hover:bg-red-600 text-white h-6 px-2 text-[13px] rounded"
+                  >
+                    Reject
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Reviewer */}

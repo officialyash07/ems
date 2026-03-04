@@ -1,5 +1,9 @@
 import { useState, useEffect } from "react";
 
+/**
+ * Settings configuration page for Admins.
+ * Allows customization of system-wide preferences, which are persisted locally.
+ */
 const AdminSettings = () => {
   const [settings, setSettings] = useState(() => {
     const savedSettings = localStorage.getItem("adminSettings");
@@ -13,6 +17,12 @@ const AdminSettings = () => {
         };
   });
 
+  /**
+   * Generic handler to update a specific setting field.
+   *
+   * @param {string} key - The setting object key
+   * @param {any} value - The new value for the setting
+   */
   const handleChange = (key, value) => {
     setSettings((prev) => ({
       ...prev,
@@ -20,6 +30,9 @@ const AdminSettings = () => {
     }));
   };
 
+  /**
+   * Persists the current settings object to local storage.
+   */
   const handleSave = () => {
     localStorage.setItem("adminSettings", JSON.stringify(settings));
     alert("Settings saved successfully");

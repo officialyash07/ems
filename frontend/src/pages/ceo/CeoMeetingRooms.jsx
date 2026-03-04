@@ -14,6 +14,10 @@ import {
   PhoneOff,
 } from "lucide-react";
 
+/**
+ * Interactive virtual meeting room specifically for the CEO.
+ * Handles WebRTC streams, screen sharing, recording, and chat interfaces.
+ */
 const CeoMeetingRooms = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -34,10 +38,17 @@ const CeoMeetingRooms = () => {
   const streamRef = useRef(null);
   const videoRef = useRef(null);
 
+  /**
+   * Immediately halts all running media tracks for user privacy and resource cleanup.
+   */
   const stopCurrentStream = () => {
     streamRef.current?.getTracks().forEach((track) => track.stop());
   };
 
+  /**
+   * Initiates the departure sequence from the meeting room, ensuring
+   * that streams and active recordings are safely terminated prior to navigation.
+   */
   const leaveMeeting = () => {
     stopCurrentStream();
     if (
@@ -49,6 +60,14 @@ const CeoMeetingRooms = () => {
     navigate(-1);
   };
 
+  /**
+   * Prompts the browser for access to specific media devices based on constraints.
+   *
+   * @param {object} options
+   * @param {boolean} options.audio - Whether to request microphone access
+   * @param {boolean} options.video - Whether to request camera access
+   * @returns {Promise<MediaStream|null>} The granted media stream or null if denied
+   */
   const requestMedia = async ({ audio = true, video = true } = {}) => {
     if (!navigator.mediaDevices?.getUserMedia) {
       setMediaError("Media devices are not supported in this browser.");
@@ -83,6 +102,9 @@ const CeoMeetingRooms = () => {
     }
   };
 
+  /**
+   * Cycles the microphone's enabled status, re-requesting permissions if necessary.
+   */
   const toggleMic = () => {
     if (!streamRef.current) {
       requestMedia({ audio: true, video: cameraOn });
@@ -100,6 +122,9 @@ const CeoMeetingRooms = () => {
     setMicOn(nextMicOn);
   };
 
+  /**
+   * Cycles the camera's enabled status, re-requesting permissions if necessary.
+   */
   const toggleCamera = () => {
     if (!streamRef.current) {
       requestMedia({ audio: micOn, video: true });
@@ -117,12 +142,19 @@ const CeoMeetingRooms = () => {
     setCameraOn(nextCameraOn);
   };
 
+  /**
+   * Closes the active screen sharing session and attempts to restore the user's camera.
+   */
   const stopScreenShare = async () => {
     setIsScreenSharing(false);
     stopCurrentStream();
     await requestMedia({ audio: true, video: true });
   };
 
+  /**
+   * Toggles the presentation of the user's screen replacing their camera stream.
+   * Intercepts `displayMedia` permission workflows and monitors presentation status.
+   */
   const toggleScreenShare = async () => {
     if (isScreenSharing) {
       await stopScreenShare();
@@ -161,6 +193,9 @@ const CeoMeetingRooms = () => {
     }
   };
 
+  /**
+   * Dispatches the local user's text typed into the in-room chat.
+   */
   const sendMessage = () => {
     const trimmedMessage = chatInput.trim();
     if (!trimmedMessage) {
@@ -194,6 +229,9 @@ const CeoMeetingRooms = () => {
   }, []);
 
   // Start Recording
+  /**
+   * Begins saving the composite audio/video streams to memory chunks.
+   */
   const startRecording = async () => {
     let stream = streamRef.current;
 
@@ -233,6 +271,9 @@ const CeoMeetingRooms = () => {
   };
 
   // Stop Recording
+  /**
+   * Concludes the recording process and spawns a direct download of the resultant `.webm` file.
+   */
   const stopRecording = () => {
     if (
       mediaRecorderRef.current &&
@@ -320,6 +361,14 @@ const CeoMeetingRooms = () => {
           <Circle className={recording ? "text-red-500 animate-pulse" : ""} />
         </button>
 
+        {/* LEAVE MEETING */}
+        <button
+          onClick={leaveMeeting}
+          className="text-red-500 hover:text-red-400"
+        >
+          <PhoneOff />
+        </button>
+
         <button>
           <UserPlus />
         </button>
@@ -339,14 +388,6 @@ const CeoMeetingRooms = () => {
 
         <button onClick={toggleScreenShare}>
           <ScreenShare className={isScreenSharing ? "text-green-400" : ""} />
-        </button>
-
-        {/* LEAVE MEETING */}
-        <button
-          onClick={leaveMeeting}
-          className="text-red-500 hover:text-red-400"
-        >
-          <PhoneOff />
         </button>
       </div>
     </div>

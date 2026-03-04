@@ -67,6 +67,10 @@ const initialMessages = {
   ],
 };
 
+/**
+ * Specialized chat interface for manager-intern coordination.
+ * Connects interns with technical support and team-level communications.
+ */
 const Manager_internDepartmentChat = () => {
   const [activeChannel, setActiveChannel] = useState(channels[0]);
   const [messages, setMessages] = useState(initialMessages);
@@ -93,6 +97,9 @@ const Manager_internDepartmentChat = () => {
       ? sharedTechSupportMessages
       : messages[activeChannel.id] || [];
 
+  /**
+   * Forwards user messages to the active channel or tech support stream.
+   */
   const sendMessage = () => {
     if (!input.trim()) return;
 

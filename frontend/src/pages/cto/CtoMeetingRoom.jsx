@@ -14,6 +14,10 @@ import {
   PhoneOff,
 } from "lucide-react";
 
+/**
+ * Virtual collaboration suite designed for CTO-level technical briefings and architecture reviews.
+ * Integrates multimedia streaming, screen sharing, and localized session recording.
+ */
 const CtoMeetingRoom = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -34,10 +38,16 @@ const CtoMeetingRoom = () => {
   const streamRef = useRef(null);
   const videoRef = useRef(null);
 
+  /**
+   * Resets and releases all active MediaStream tracks controlled by the component.
+   */
   const stopCurrentStream = () => {
     streamRef.current?.getTracks().forEach((track) => track.stop());
   };
 
+  /**
+   * Finalizes meeting state: stopping capture, persisting recordings, and navigating the CTO out.
+   */
   const leaveMeeting = () => {
     stopCurrentStream();
     if (
@@ -49,6 +59,12 @@ const CtoMeetingRoom = () => {
     navigate(-1);
   };
 
+  /**
+   * Resolves browser constraints to obtain hardware access for multimedia ingestion.
+   *
+   * @param {object} constraints - Requirement flags for audio and video
+   * @returns {Promise<MediaStream|null>} The provisioned stream or null on failure
+   */
   const requestMedia = async ({ audio = true, video = true } = {}) => {
     if (!navigator.mediaDevices?.getUserMedia) {
       setMediaError("Media devices are not supported in this browser.");
@@ -83,6 +99,9 @@ const CtoMeetingRoom = () => {
     }
   };
 
+  /**
+   * Switches the active muting state for the microphone hardware track.
+   */
   const toggleMic = () => {
     if (!streamRef.current) {
       requestMedia({ audio: true, video: cameraOn });
@@ -100,6 +119,9 @@ const CtoMeetingRoom = () => {
     setMicOn(nextMicOn);
   };
 
+  /**
+   * Cycles the power state for the localized camera visual track.
+   */
   const toggleCamera = () => {
     if (!streamRef.current) {
       requestMedia({ audio: micOn, video: true });
@@ -117,12 +139,18 @@ const CtoMeetingRoom = () => {
     setCameraOn(nextCameraOn);
   };
 
+  /**
+   * Terminates active display surface capture and reverts to localized camera feed.
+   */
   const stopScreenShare = async () => {
     setIsScreenSharing(false);
     stopCurrentStream();
     await requestMedia({ audio: true, video: true });
   };
 
+  /**
+   * Replaces the local camera feed with a stream from an external display or window.
+   */
   const toggleScreenShare = async () => {
     if (isScreenSharing) {
       await stopScreenShare();
@@ -161,6 +189,9 @@ const CtoMeetingRoom = () => {
     }
   };
 
+  /**
+   * Appends a new textual entry to the localized session chat history.
+   */
   const sendMessage = () => {
     const trimmedMessage = chatInput.trim();
     if (!trimmedMessage) {
@@ -194,6 +225,9 @@ const CtoMeetingRoom = () => {
   }, []);
 
   // Start Recording
+  /**
+   * Commences recording of the active multimedia stream using the browser MediaRecorder API.
+   */
   const startRecording = async () => {
     let stream = streamRef.current;
 
@@ -233,6 +267,9 @@ const CtoMeetingRoom = () => {
   };
 
   // Stop Recording
+  /**
+   * Concludes the active recording session and triggers local file export.
+   */
   const stopRecording = () => {
     if (
       mediaRecorderRef.current &&

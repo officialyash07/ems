@@ -2,6 +2,13 @@ import MeetingStatusBadge from "./MeetingStatusBadge";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 
+/**
+ * Card displaying essential details of an upcoming or scheduled meeting.
+ * Used within team lead dashboard areas. Supports starting or joining a meeting room.
+ *
+ * @param {object} meeting - The meeting object containing title, datetime, participants, and status
+ * @param {boolean} [joinOnly=false] - If true, the button is forced to say "Join" rather than conditional "Start/Join"
+ */
 const MeetingCard = ({ meeting, joinOnly = false }) => {
   const navigate = useNavigate();
   const role = useSelector((state) => state.auth?.role);

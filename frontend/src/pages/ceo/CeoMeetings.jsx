@@ -26,8 +26,12 @@ const initialMeetings = [
   },
 ];
 
+/**
+ * Management interface for the CEO's meeting schedules.
+ * Allows viewing upcoming meetings and scheduling new ones via a modal form.
+ */
 const CeoMeetings = () => {
-  const navigate = useNavigate();   // ✅ FIX ADDED
+  const navigate = useNavigate(); // ✅ FIX ADDED
 
   const [meetings, setMeetings] = useState(initialMeetings);
   const [open, setOpen] = useState(false);
@@ -40,6 +44,12 @@ const CeoMeetings = () => {
     description: "",
   });
 
+  /**
+   * Helper utility to convert a 24-hour time string into a formatted 12-hour string.
+   *
+   * @param {string} time - The raw time string from the input (e.g., "14:30")
+   * @returns {string} Formatted time string (e.g., "2:30 PM")
+   */
   const formatTime = (time) => {
     const [h, m] = time.split(":");
     const hour = parseInt(h, 10);
@@ -48,6 +58,10 @@ const CeoMeetings = () => {
     return `${hour12}:${m} ${ampm}`;
   };
 
+  /**
+   * Constructs a new meeting object from the form state and prepends it to the list.
+   * Validates that required fields (title, date, time) are present before saving.
+   */
   const handleCreate = () => {
     if (!form.title || !form.date || !form.time) return;
 
@@ -55,7 +69,7 @@ const CeoMeetings = () => {
       id: Date.now(),
       title: form.title,
       datetime: `${new Date(form.date).toDateString()} at ${formatTime(
-        form.time
+        form.time,
       )}`,
       participants: form.participants || "—",
       status: "Scheduled",
@@ -112,7 +126,9 @@ const CeoMeetings = () => {
 
               {/* ✅ VIEW BUTTON WORKING */}
               <button
-                onClick={() => navigate(`/ceo/ceo-meeting-rooms/${meetings.id}`)}
+                onClick={() =>
+                  navigate(`/ceo/ceo-meeting-rooms/${meetings.id}`)
+                }
                 className="rounded-md bg-indigo-600 px-4 py-1.5 text-sm text-white hover:bg-indigo-700"
               >
                 View
@@ -138,9 +154,7 @@ const CeoMeetings = () => {
                 placeholder="Title"
                 className="w-full rounded border border-gray-300 px-3 py-2"
                 value={form.title}
-                onChange={(e) =>
-                  setForm({ ...form, title: e.target.value })
-                }
+                onChange={(e) => setForm({ ...form, title: e.target.value })}
               />
 
               <div className="grid grid-cols-2 gap-3">
@@ -148,17 +162,13 @@ const CeoMeetings = () => {
                   type="date"
                   className="rounded border border-gray-300 px-3 py-2"
                   value={form.date}
-                  onChange={(e) =>
-                    setForm({ ...form, date: e.target.value })
-                  }
+                  onChange={(e) => setForm({ ...form, date: e.target.value })}
                 />
                 <input
                   type="time"
                   className="rounded border border-gray-300 px-3 py-2"
                   value={form.time}
-                  onChange={(e) =>
-                    setForm({ ...form, time: e.target.value })
-                  }
+                  onChange={(e) => setForm({ ...form, time: e.target.value })}
                 />
               </div>
 

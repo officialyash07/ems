@@ -3,6 +3,12 @@ import { useNavigate } from "react-router-dom";
 
 import { Link } from "react-router-dom";
 
+/**
+ * Component displaying details of an upcoming or past meeting for an intern.
+ * Includes a quick access button to join the meeting room.
+ *
+ * @param {object} meeting - The meeting details (title, date, time, duration, platform, id)
+ */
 const MeetingRow = ({ meeting }) => {
   const navigate = useNavigate();
   return (

@@ -1,10 +1,18 @@
-import { useEffect, useState } from 'react';
-import { apiNotifications } from '../utils/api';
-import { Bell, X, Check, Trash2 } from 'lucide-react';
+import { useEffect, useState } from "react";
+import { apiNotifications } from "../utils/api";
+import { Bell, X, Check, Trash2 } from "lucide-react";
 
+/**
+ * NotificationsPanel component displays a bell icon with unread count badge.
+ * Clicking the icon toggles a dropdown showing a list of recent notifications,
+ * allowing the user to mark them as read, delete them, or clear all.
+ */
 const NotificationsPanel = () => {
+  // State for notifications list and unread count tally
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
+
+  // UI states
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -15,30 +23,36 @@ const NotificationsPanel = () => {
     return () => clearInterval(interval);
   }, []);
 
+  /**
+   * Fetches notifications from backend, updates state, and recalculates unread sum.
+   */
   const loadNotifications = async () => {
     try {
       setIsLoading(true);
       const { notifications } = await apiNotifications.getNotifications(50, 0);
       setNotifications(notifications);
-      
+
       const unread = notifications.filter((n) => !n.isRead).length;
       setUnreadCount(unread);
     } catch (error) {
-      console.error('Failed to load notifications:', error);
+      console.error("Failed to load notifications:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
+  /**
+   * Calls API to mark a single notification as read and updates component state.
+   */
   const handleMarkAsRead = async (notificationId) => {
     try {
       await apiNotifications.markAsRead(notificationId);
       setNotifications((prev) =>
-        prev.map((n) => (n.id === notificationId ? { ...n, isRead: true } : n))
+        prev.map((n) => (n.id === notificationId ? { ...n, isRead: true } : n)),
       );
       setUnreadCount((prev) => Math.max(0, prev - 1));
     } catch (error) {
-      console.error('Failed to mark notification as read:', error);
+      console.error("Failed to mark notification as read:", error);
     }
   };
 
@@ -47,42 +61,46 @@ const NotificationsPanel = () => {
       await apiNotifications.deleteNotification(notificationId);
       setNotifications((prev) => prev.filter((n) => n.id !== notificationId));
     } catch (error) {
-      console.error('Failed to delete notification:', error);
+      console.error("Failed to delete notification:", error);
     }
   };
 
+  /**
+   * Marks all notifications as read simultaneously.
+   */
   const handleMarkAllAsRead = async () => {
     try {
       await apiNotifications.markAllAsRead();
       setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
       setUnreadCount(0);
     } catch (error) {
-      console.error('Failed to mark all as read:', error);
+      console.error("Failed to mark all as read:", error);
     }
   };
 
   const handleClearAll = async () => {
-    if (!window.confirm('Are you sure you want to clear all notifications?')) return;
+    if (!window.confirm("Are you sure you want to clear all notifications?"))
+      return;
 
     try {
       await apiNotifications.clearAll();
       setNotifications([]);
       setUnreadCount(0);
     } catch (error) {
-      console.error('Failed to clear notifications:', error);
+      console.error("Failed to clear notifications:", error);
     }
   };
 
   const getNotificationIcon = (type) => {
     switch (type) {
-      case 'chat':
-        return '💬';
-      case 'meeting':
-        return '📅';
-      case 'email':
-        return '📧';
+      case "chat":
+        return "💬";
+      case "meeting":
+        return "📅";
+      case "email":
+        return "📧";
       default:
-        return '🔔';
+        return "🔔";
     }
   };
 
@@ -97,7 +115,7 @@ const NotificationsPanel = () => {
         <Bell className="w-6 h-6" />
         {unreadCount > 0 && (
           <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
-            {unreadCount > 9 ? '9+' : unreadCount}
+            {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
       </button>
@@ -150,7 +168,7 @@ const NotificationsPanel = () => {
                 <div
                   key={notification.id}
                   className={`p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition ${
-                    !notification.isRead ? 'bg-blue-50' : ''
+                    !notification.isRead ? "bg-blue-50" : ""
                   }`}
                 >
                   <div className="flex items-start gap-3">
@@ -184,7 +202,9 @@ const NotificationsPanel = () => {
                         </button>
                       )}
                       <button
-                        onClick={() => handleDeleteNotification(notification.id)}
+                        onClick={() =>
+                          handleDeleteNotification(notification.id)
+                        }
                         className="p-1 text-red-600 hover:bg-red-100 rounded"
                         title="Delete"
                       >

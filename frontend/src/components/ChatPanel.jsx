@@ -1,18 +1,32 @@
-import { useEffect, useState, useRef } from 'react';
-import { useChatSocket } from '../hooks/useChatSocket';
-import { apiChat } from '../utils/api';
-import { Send, Trash2, Edit2, AlertCircle, MessageCircle } from 'lucide-react';
+import { useEffect, useState, useRef } from "react";
+import { useChatSocket } from "../hooks/useChatSocket";
+import { apiChat } from "../utils/api";
+import { Send, Trash2, Edit2, AlertCircle, MessageCircle } from "lucide-react";
 
+/**
+ * ChatComponent handles the real-time chat interface for a specific chat room.
+ * It manages WebSocket connections, message history, typing indicators, and user interactions.
+ *
+ * @param {string|number} chatId - Unique identifier for the chat room
+ * @param {string|number} userId - ID of the currently logged-in user
+ * @param {string} userName - Display name of the currently logged-in user
+ */
 const ChatComponent = ({ chatId, userId, userName }) => {
-  const { socket, isConnected } = useChatSocket();
+  const { socket, isConnected } = useChatSocket(); // Custom hook handling socket connection
+
+  // State variables for managing chat functionality
   const [messages, setMessages] = useState([]);
-  const [newMessage, setNewMessage] = useState('');
+  const [newMessage, setNewMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isMuted, setIsMuted] = useState(false);
   const [typingUsers, setTypingUsers] = useState([]);
+
+  // State for message editing functionality
   const [editingMessageId, setEditingMessageId] = useState(null);
-  const [editContent, setEditContent] = useState('');
+  const [editContent, setEditContent] = useState("");
+
+  // Reference to scroll to the latest message
   const messagesEndRef = useRef(null);
 
   // Load initial messages
@@ -25,7 +39,7 @@ const ChatComponent = ({ chatId, userId, userName }) => {
         setError(null);
       } catch (err) {
         setError(err.message);
-        console.error('Failed to load messages:', err);
+        console.error("Failed to load messages:", err);
       } finally {
         setIsLoading(false);
       }
@@ -36,7 +50,7 @@ const ChatComponent = ({ chatId, userId, userName }) => {
 
   // Scroll to bottom when new messages arrive
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   // Socket event listeners
@@ -44,97 +58,114 @@ const ChatComponent = ({ chatId, userId, userName }) => {
     if (!socket || !isConnected) return;
 
     // Join chat
-    socket.emit('join_chat', { chatId, userId });
+    socket.emit("join_chat", { chatId, userId });
 
     // Listen for new messages
-    socket.on('new_message', (message) => {
+    socket.on("new_message", (message) => {
       setMessages((prev) => [...prev, message]);
     });
 
     // Listen for edited messages
-    socket.on('message_edited', (data) => {
+    socket.on("message_edited", (data) => {
       setMessages((prev) =>
-        prev.map((msg) => (msg.id === data.id ? { ...msg, ...data } : msg))
+        prev.map((msg) => (msg.id === data.id ? { ...msg, ...data } : msg)),
       );
     });
 
     // Listen for deleted messages
-    socket.on('message_deleted', (data) => {
+    socket.on("message_deleted", (data) => {
       setMessages((prev) => prev.filter((msg) => msg.id !== data.id));
     });
 
     // Listen for typing indicators
-    socket.on('typing', (data) => {
+    socket.on("typing", (data) => {
       setTypingUsers((prev) => [...new Set([...prev, data.userName])]);
     });
 
-    socket.on('stop_typing', (data) => {
+    socket.on("stop_typing", (data) => {
       setTypingUsers((prev) => prev.filter((user) => user !== data.userId));
     });
 
     // Listen for errors
-    socket.on('error', (error) => {
+    socket.on("error", (error) => {
       setError(error.message);
-      if (error.message.includes('muted')) {
+      if (error.message.includes("muted")) {
         setIsMuted(true);
       }
     });
 
     return () => {
-      socket.emit('leave_chat', { chatId, userId });
-      socket.off('new_message');
-      socket.off('message_edited');
-      socket.off('message_deleted');
-      socket.off('typing');
-      socket.off('stop_typing');
-      socket.off('error');
+      socket.emit("leave_chat", { chatId, userId });
+      socket.off("new_message");
+      socket.off("message_edited");
+      socket.off("message_deleted");
+      socket.off("typing");
+      socket.off("stop_typing");
+      socket.off("error");
     };
   }, [socket, isConnected, chatId, userId]);
 
+  /**
+   * Sender handler for new messages. Emit via socket and locally clear input.
+   * @param {Event} e - Form submission event
+   */
   const handleSendMessage = async (e) => {
     e.preventDefault();
 
     if (!newMessage.trim()) return;
 
     try {
-      socket.emit('send_message', {
+      socket.emit("send_message", {
         chatId,
         senderId: userId,
         content: newMessage,
       });
 
-      setNewMessage('');
+      setNewMessage("");
       setError(null);
     } catch (err) {
       setError(err.message);
     }
   };
 
+  /**
+   * Edit handler. Commits changes via API and broadcasts edit event via socket.
+   * @param {string|number} messageId - The ID of the message to edit
+   */
   const handleEditMessage = async (messageId) => {
     if (!editContent.trim()) return;
 
     try {
       await apiChat.editMessage(messageId, editContent);
-      socket.emit('edit_message', { messageId, content: editContent });
+      socket.emit("edit_message", { messageId, content: editContent });
       setEditingMessageId(null);
-      setEditContent('');
+      setEditContent("");
     } catch (err) {
       setError(err.message);
     }
   };
 
+  /**
+   * Deletes a message through the API, broadcasts deletion via socket,
+   * and removes it locally from state.
+   * @param {string|number} messageId - The ID of the message to delete
+   */
   const handleDeleteMessage = async (messageId) => {
     try {
       await apiChat.deleteMessage(messageId);
-      socket.emit('delete_message', { messageId });
+      socket.emit("delete_message", { messageId });
       setMessages((prev) => prev.filter((msg) => msg.id !== messageId));
     } catch (err) {
       setError(err.message);
     }
   };
 
+  /**
+   * Broadcasts to other users that the current user is typing.
+   * Prevents spam by automatically stopping after 3s.
+   */
   const handleTyping = () => {
-    socket?.emit('user_typing', {
+    socket?.emit("user_typing", {
       chatId,
       userId,
       userName,
@@ -142,7 +173,7 @@ const ChatComponent = ({ chatId, userId, userName }) => {
 
     // Stop typing after 3 seconds of inactivity
     setTimeout(() => {
-      socket?.emit('user_stopped_typing', {
+      socket?.emit("user_stopped_typing", {
         chatId,
         userId,
       });
@@ -166,7 +197,7 @@ const ChatComponent = ({ chatId, userId, userName }) => {
       <div className="bg-blue-600 text-white p-4 shadow">
         <h2 className="text-xl font-bold">Chat</h2>
         <p className="text-blue-100 text-sm">
-          {isConnected ? '🟢 Connected' : '🔴 Disconnected'}
+          {isConnected ? "🟢 Connected" : "🔴 Disconnected"}
         </p>
       </div>
 
@@ -183,7 +214,8 @@ const ChatComponent = ({ chatId, userId, userName }) => {
       {/* Typing Indicator */}
       {typingUsers.length > 0 && (
         <div className="bg-gray-100 px-4 py-2 text-sm text-gray-600">
-          {typingUsers.join(', ')} {typingUsers.length === 1 ? 'is' : 'are'} typing...
+          {typingUsers.join(", ")} {typingUsers.length === 1 ? "is" : "are"}{" "}
+          typing...
         </div>
       )}
 
@@ -197,13 +229,13 @@ const ChatComponent = ({ chatId, userId, userName }) => {
           messages.map((message) => (
             <div
               key={message.id}
-              className={`flex ${message.senderId === userId ? 'justify-end' : 'justify-start'}`}
+              className={`flex ${message.senderId === userId ? "justify-end" : "justify-start"}`}
             >
               <div
                 className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
                   message.senderId === userId
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-gray-200 text-gray-900'
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-200 text-gray-900"
                 }`}
               >
                 <div className="flex items-start justify-between gap-2">
@@ -242,27 +274,28 @@ const ChatComponent = ({ chatId, userId, userName }) => {
                     </p>
                   </div>
 
-                  {message.senderId === userId && editingMessageId !== message.id && (
-                    <div className="flex gap-1">
-                      <button
-                        onClick={() => {
-                          setEditingMessageId(message.id);
-                          setEditContent(message.content);
-                        }}
-                        className="p-1 hover:bg-blue-600 rounded"
-                        title="Edit"
-                      >
-                        <Edit2 className="w-3 h-3" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteMessage(message.id)}
-                        className="p-1 hover:bg-red-600 rounded"
-                        title="Delete"
-                      >
-                        <Trash2 className="w-3 h-3" />
-                      </button>
-                    </div>
-                  )}
+                  {message.senderId === userId &&
+                    editingMessageId !== message.id && (
+                      <div className="flex gap-1">
+                        <button
+                          onClick={() => {
+                            setEditingMessageId(message.id);
+                            setEditContent(message.content);
+                          }}
+                          className="p-1 hover:bg-blue-600 rounded"
+                          title="Edit"
+                        >
+                          <Edit2 className="w-3 h-3" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteMessage(message.id)}
+                          className="p-1 hover:bg-red-600 rounded"
+                          title="Delete"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                    )}
                 </div>
               </div>
             </div>
@@ -274,7 +307,9 @@ const ChatComponent = ({ chatId, userId, userName }) => {
       {/* Input Area */}
       {isMuted ? (
         <div className="bg-red-50 border-t border-red-200 p-4 text-center">
-          <p className="text-red-600 text-sm">⚠️ You have been muted and cannot send messages.</p>
+          <p className="text-red-600 text-sm">
+            ⚠️ You have been muted and cannot send messages.
+          </p>
         </div>
       ) : (
         <form onSubmit={handleSendMessage} className="border-t p-4 bg-gray-50">

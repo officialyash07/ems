@@ -26,6 +26,10 @@ const initialMeetings = [
   },
 ];
 
+/**
+ * Integrated meeting planner for the Chief Operating Officer.
+ * Displays scheduled operational syncs and presents a modal to create new engagements.
+ */
 const CooMeetings = () => {
   const navigate = useNavigate();
   const [meetings, setMeetings] = useState(initialMeetings);
@@ -39,6 +43,12 @@ const CooMeetings = () => {
     description: "",
   });
 
+  /**
+   * Helper utility to convert a 24-hour time representation into a 12-hour am/pm string.
+   *
+   * @param {string} time - Raw time input from form (e.g., "14:00")
+   * @returns {string} Human-readable time format (e.g., "2:00 PM")
+   */
   const formatTime = (time) => {
     const [h, m] = time.split(":");
     const hour = parseInt(h, 10);
@@ -47,6 +57,10 @@ const CooMeetings = () => {
     return `${hour12}:${m} ${ampm}`;
   };
 
+  /**
+   * Translates the active modal form inputs into a finalized meeting object
+   * and subsequently injects it onto the top of the meeting feed.
+   */
   const handleCreate = () => {
     if (!form.title || !form.date || !form.time) return;
 
