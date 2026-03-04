@@ -4,6 +4,7 @@ import {
   Send,
   Paperclip,
   ChevronDown,
+  Hash,
   Users,
   Briefcase,
   ShieldCheck,
@@ -13,7 +14,6 @@ import {
   MoreVertical,
   File,
 } from "lucide-react";
-import { getSharedTechSupportMessages } from "../../utils/techSupportStore";
 
 const people = {
   managers: [
@@ -67,7 +67,91 @@ const people = {
   },
 };
 
+const organizationDepartments = [
+  {
+    id: "technical",
+    name: "Technical",
+    channels: [
+      {
+        id: "tech-announcements",
+        name: "Announcements",
+        type: "channel",
+        description: "Important updates only",
+      },
+      {
+        id: "tech-stack",
+        name: "Tech Stack",
+        type: "channel",
+        description: "Discussions on tech stack",
+      },
+      {
+        id: "tech-team-updates",
+        name: "Team Updates",
+        type: "channel",
+        description: "Updates from the team",
+      },
+    ],
+  },
+  {
+    id: "finance",
+    name: "Finance",
+    channels: [
+      {
+        id: "fin-announcements",
+        name: "Announcements",
+        type: "channel",
+        description: "Important updates only",
+      },
+      {
+        id: "fin-stack",
+        name: "Tech Stack",
+        type: "channel",
+        description: "Discussions on tech stack",
+      },
+      {
+        id: "fin-team-updates",
+        name: "Team Updates",
+        type: "channel",
+        description: "Updates from the team",
+      },
+    ],
+  },
+  {
+    id: "operation",
+    name: "Operation",
+    channels: [
+      {
+        id: "ops-announcements",
+        name: "Announcements",
+        type: "channel",
+        description: "Important updates only",
+      },
+      {
+        id: "ops-stack",
+        name: "Tech Stack",
+        type: "channel",
+        description: "Discussions on tech stack",
+      },
+      {
+        id: "ops-team-updates",
+        name: "Team Updates",
+        type: "channel",
+        description: "Updates from the team",
+      },
+    ],
+  },
+];
+
 const initialMessages = {
+  "tech-announcements": [
+    {
+      from: "CEO Office",
+      text: "Welcome to the Technical department announcements.",
+      time: "9:00 AM",
+      mine: false,
+      type: "text",
+    },
+  ],
   1: [
     {
       from: "Sarah Lee",
@@ -81,31 +165,20 @@ const initialMessages = {
 };
 
 const CeoOrganizationChat = () => {
-  const [activeUser, setActiveUser] = useState(people.managers[0]);
+  const [activeUser, setActiveUser] = useState(
+    organizationDepartments[0].channels[0],
+  );
   const [messages, setMessages] = useState(initialMessages);
-  const [sharedTechSupportMessages, setSharedTechSupportMessages] = useState([]);
   const [input, setInput] = useState("");
   const [groupMembers, setGroupMembers] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const fileInputRef = useRef(null);
 
   useEffect(() => {
-    setSharedTechSupportMessages(getSharedTechSupportMessages());
-
-    const onStorage = (event) => {
-      if (event.key === "ems_shared_tech_support_messages") {
-        setSharedTechSupportMessages(getSharedTechSupportMessages());
-      }
-    };
-
-    window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
+    // Add any necessary global event listeners here
   }, []);
 
-  const currentMessages =
-    activeUser.id === "tech-support"
-      ? sharedTechSupportMessages
-      : messages[activeUser.id] || [];
+  const currentMessages = messages[activeUser.id] || [];
 
   const sendMessage = () => {
     if (!input.trim()) return;
@@ -183,111 +256,160 @@ const CeoOrganizationChat = () => {
         </div>
 
         <div className="flex-1 overflow-y-auto custom-scrollbar">
-          {/* Managers Section (Direct Messages) */}
-          <div className="px-4 py-2 text-[10px] font-bold text-slate-400 flex items-center gap-1 uppercase tracking-widest">
-            <ChevronDown size={12} /> Direct Messages
-          </div>
-
-          <div className="mt-1 space-y-1 px-2">
-            {people.managers.map((m) => (
-              <button
-                key={m.id}
-                onClick={() => setActiveUser(m)}
-                className={`w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-all ${
-                  activeUser.id === m.id
-                    ? "bg-blue-600 text-white shadow-md shadow-blue-200"
-                    : "hover:bg-slate-200 text-slate-700"
-                }`}
-              >
-                <div className="relative flex-shrink-0">
-                  <img
-                    src={m.avatar}
-                    alt=""
-                    className="h-9 w-9 rounded-full object-cover border border-white/20"
-                  />
-                  {m.online && (
-                    <span
-                      className={`absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 ${activeUser.id === m.id ? "bg-green-400 border-blue-600" : "bg-green-500 border-white"}`}
-                    />
-                  )}
-                </div>
-                <div className="flex-1 overflow-hidden">
-                  <div className="text-sm font-semibold truncate leading-tight">
-                    {m.name}
-                  </div>
-                  <div
-                    className={`text-[10px] truncate uppercase font-medium ${activeUser.id === m.id ? "text-blue-100" : "text-slate-500"}`}
+          {organizationDepartments.map((dept) => (
+            <div key={dept.id} className="mb-6">
+              <div className="px-4 py-2 text-[10px] font-bold text-slate-400 flex items-center gap-1 uppercase tracking-widest">
+                <ChevronDown size={12} /> {dept.name}
+              </div>
+              <div className="mt-1 space-y-1 px-2">
+                {dept.channels.map((c) => (
+                  <button
+                    key={c.id}
+                    onClick={() => setActiveUser(c)}
+                    className={`w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-all ${
+                      activeUser.id === c.id
+                        ? "bg-blue-600 text-white shadow-md shadow-blue-200"
+                        : "hover:bg-slate-200 text-slate-700"
+                    }`}
                   >
-                    {m.role}
-                  </div>
-                </div>
-              </button>
-            ))}
-          </div>
-
-          {/* Group Chat Section */}
-          <div className="mt-6 px-4 py-2 text-[10px] font-bold text-slate-400 flex items-center gap-1 uppercase tracking-widest">
-            <ChevronDown size={12} /> Groups
-          </div>
-          <div className="mt-1 space-y-1 px-2">
-            <button
-              onClick={() => setActiveUser(people.group)}
-              className={`w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-all ${
-                activeUser.id === people.group.id
-                  ? "bg-blue-600 text-white shadow-md shadow-blue-200"
-                  : "hover:bg-slate-200 text-slate-700"
-              }`}
-            >
-              <div className="relative flex-shrink-0">
-                <img
-                  src={people.group.avatar}
-                  alt=""
-                  className="h-9 w-9 rounded-full object-cover border border-white/20"
-                />
+                    <div
+                      className={`h-9 w-9 rounded-full flex items-center justify-center flex-shrink-0 ${
+                        activeUser.id === c.id
+                          ? "bg-blue-500 text-white"
+                          : "bg-slate-200 text-slate-500"
+                      }`}
+                    >
+                      <Hash size={18} />
+                    </div>
+                    <div className="flex-1 overflow-hidden">
+                      <div className="text-sm font-semibold truncate leading-tight">
+                        {c.name}
+                      </div>
+                      <div
+                        className={`text-[10px] truncate uppercase font-medium ${activeUser.id === c.id ? "text-blue-100" : "text-slate-500"}`}
+                      >
+                        {c.description}
+                      </div>
+                    </div>
+                  </button>
+                ))}
               </div>
-              <div className="flex-1 overflow-hidden">
-                <div className="text-sm font-semibold truncate leading-tight">
-                  {people.group.name}
-                </div>
-                <div
-                  className={`text-[10px] truncate uppercase font-medium ${activeUser.id === people.group.id ? "text-blue-100" : "text-slate-500"}`}
-                >
-                  {people.group.role}
-                </div>
+            </div>
+          ))}
+
+          {false && (
+            <>
+              {/* Managers Section (Direct Messages) */}
+              <div className="px-4 py-2 text-[10px] font-bold text-slate-400 flex items-center gap-1 uppercase tracking-widest">
+                <ChevronDown size={12} /> Direct Messages
               </div>
-            </button>
-          </div>
 
-          {/* Panels Section (Departments) */}
-          <div className="mt-6 px-4 py-2 text-[10px] font-bold text-slate-400 flex items-center gap-1 uppercase tracking-widest">
-            <ChevronDown size={12} /> Departments
-          </div>
+              <div className="mt-1 space-y-1 px-2">
+                {people.managers.map((m) => (
+                  <button
+                    key={m.id}
+                    onClick={() => setActiveUser(m)}
+                    className={`w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-all ${
+                      activeUser.id === m.id
+                        ? "bg-blue-600 text-white shadow-md shadow-blue-200"
+                        : "hover:bg-slate-200 text-slate-700"
+                    }`}
+                  >
+                    <div className="relative flex-shrink-0">
+                      <img
+                        src={m.avatar}
+                        alt=""
+                        className="h-9 w-9 rounded-full object-cover border border-white/20"
+                      />
+                      {m.online && (
+                        <span
+                          className={`absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 ${activeUser.id === m.id ? "bg-green-400 border-blue-600" : "bg-green-500 border-white"}`}
+                        />
+                      )}
+                    </div>
+                    <div className="flex-1 overflow-hidden">
+                      <div className="text-sm font-semibold truncate leading-tight">
+                        {m.name}
+                      </div>
+                      <div
+                        className={`text-[10px] truncate uppercase font-medium ${activeUser.id === m.id ? "text-blue-100" : "text-slate-500"}`}
+                      >
+                        {m.role}
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
 
-          <div className="mt-1 space-y-1 px-2 pb-6">
-            {people.departments.map((d) => {
-              const Icon = d.icon;
-              return (
+              {/* Group Chat Section */}
+              <div className="mt-6 px-4 py-2 text-[10px] font-bold text-slate-400 flex items-center gap-1 uppercase tracking-widest">
+                <ChevronDown size={12} /> Groups
+              </div>
+              <div className="mt-1 space-y-1 px-2">
                 <button
-                  key={d.id}
-                  onClick={() =>
-                    setActiveUser({ ...d, role: "Department", avatar: null })
-                  }
-                  className={`w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all ${
-                    activeUser.id === d.id
+                  onClick={() => setActiveUser(people.group)}
+                  className={`w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-all ${
+                    activeUser.id === people.group.id
                       ? "bg-blue-600 text-white shadow-md shadow-blue-200"
-                      : "text-slate-700 hover:bg-slate-200"
+                      : "hover:bg-slate-200 text-slate-700"
                   }`}
                 >
-                  <div
-                    className={`h-9 w-9 rounded-full flex items-center justify-center flex-shrink-0 ${activeUser.id === d.id ? "bg-blue-500 text-white" : "bg-slate-200 text-slate-500"}`}
-                  >
-                    <Icon size={18} />
+                  <div className="relative flex-shrink-0">
+                    <img
+                      src={people.group.avatar}
+                      alt=""
+                      className="h-9 w-9 rounded-full object-cover border border-white/20"
+                    />
                   </div>
-                  <span className="font-semibold truncate">{d.name}</span>
+                  <div className="flex-1 overflow-hidden">
+                    <div className="text-sm font-semibold truncate leading-tight">
+                      {people.group.name}
+                    </div>
+                    <div
+                      className={`text-[10px] truncate uppercase font-medium ${activeUser.id === people.group.id ? "text-blue-100" : "text-slate-500"}`}
+                    >
+                      {people.group.role}
+                    </div>
+                  </div>
                 </button>
-              );
-            })}
-          </div>
+              </div>
+
+              {/* Panels Section (Departments) */}
+              <div className="mt-6 px-4 py-2 text-[10px] font-bold text-slate-400 flex items-center gap-1 uppercase tracking-widest">
+                <ChevronDown size={12} /> Departments
+              </div>
+
+              <div className="mt-1 space-y-1 px-2 pb-6">
+                {people.departments.map((d) => {
+                  const Icon = d.icon;
+                  return (
+                    <button
+                      key={d.id}
+                      onClick={() =>
+                        setActiveUser({
+                          ...d,
+                          role: "Department",
+                          avatar: null,
+                        })
+                      }
+                      className={`w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all ${
+                        activeUser.id === d.id
+                          ? "bg-blue-600 text-white shadow-md shadow-blue-200"
+                          : "text-slate-700 hover:bg-slate-200"
+                      }`}
+                    >
+                      <div
+                        className={`h-9 w-9 rounded-full flex items-center justify-center flex-shrink-0 ${activeUser.id === d.id ? "bg-blue-500 text-white" : "bg-slate-200 text-slate-500"}`}
+                      >
+                        <Icon size={18} />
+                      </div>
+                      <span className="font-semibold truncate">{d.name}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -304,7 +426,7 @@ const CeoOrganizationChat = () => {
               />
             ) : (
               <div className="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 border border-blue-100">
-                <MessageSquare size={20} />
+                <Hash size={20} />
               </div>
             )}
             <div>
@@ -315,8 +437,8 @@ const CeoOrganizationChat = () => {
                 {activeUser.online && (
                   <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse"></span>
                 )}
-                {activeUser.role}
-                {activeUser.id === people.group.id && (
+                {activeUser.description || activeUser.role}
+                {activeUser.type === "group" && (
                   <span className="ml-2 text-slate-400 font-normal">
                     • {groupMembers.length} Members
                   </span>
@@ -348,7 +470,7 @@ const CeoOrganizationChat = () => {
                 className={`flex flex-col ${m.mine ? "items-end" : "items-start"}`}
               >
                 {!m.mine && (
-                  <span className="text-[10px] font-bold text-slate-400 mb-1 ml-1 uppercase">
+                  <span className="text-[10px] font-bold text-slate-400 mb-1 ml-1 uppercase bg-slate-50 px-1 rounded">
                     {m.from}
                   </span>
                 )}
