@@ -16,7 +16,6 @@ import InternDepartmentChat from "./pages/intern/InternDepartmentChat";
 import InternProfile from "./pages/intern/InternProfile";
 import InternMeetingRoom from "./pages/intern/InternMeetingRoom";
 
-
 /* Team Lead Pages */
 import TlDashboard from "./pages/tl-panel/TlDashboard";
 import TlInternTask from "./pages/tl-panel/TlTask";
@@ -48,12 +47,11 @@ import Manager_internDepartmentChat from "./pages/manager_intern/Manager_internD
 import Manager_internReports from "./pages/manager_intern/Manager_internReports";
 import Manager_internSubmissionsReview from "./pages/manager_intern/Manager_internSubmissionsReview";
 
-
 /* Admin Pages */
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminUserManagement from "./pages/admin/AdminUserManagement";
 import AdminSettings from "./pages/admin/AdminSettings";
-import AdminChat from "./pages/admin/AdminChat"; // ADDED
+// import AdminChat from "./pages/admin/AdminChat";
 
 /* CTO Pages */
 import CtoDashboard from "./pages/cto/CtoDashboard";
@@ -95,7 +93,6 @@ import CeoOrganizationChat from "./pages/ceo/CeoOrganizationChat";
 import CeoSettings from "./pages/ceo/CeoSettings";
 import CeoMeetingRooms from "./pages/ceo/CeoMeetingRooms";
 
-
 export const router = createBrowserRouter([
   { path: "/", element: <Login /> },
   { path: "/unauthorized", element: <Unauthorized /> },
@@ -116,46 +113,47 @@ export const router = createBrowserRouter([
       { path: "meetings", element: <InternMeetings /> },
       { path: "chat", element: <InternDepartmentChat /> },
       { path: "profile", element: <InternProfile /> },
-     { path: "intern-meeting-room/:id", element: <InternMeetingRoom /> },
+      { path: "intern-meeting-room/:id", element: <InternMeetingRoom /> },
     ],
   },
 
-    /* ================= TEAM LEAD ================= */
-    {
-        path: "/team_lead",
-        element: (
-            <ProtectedRoute allowedRoles={[ROLES.TL]}>
-                <DashboardLayout />
-            </ProtectedRoute>
-        ),
-        children: [
-            { index: true, element: <Navigate to="dashboard" /> },
-            { path: "dashboard", element: <TlDashboard /> },
-            { path: "tasks", element: <TlInternTask /> },
-            { path: "reviews", element: <TlSubmissionsReview /> },
-            { path: "meetings", element: <TlMeetings /> },
-            { path: "chat", element: <TlDepartmentChat /> },
-          { path: "tl-meeting-room/:id", element: <TlMeetingRoom /> },
-        ],
-    },
+  /* ================= TEAM LEAD ================= */
+  {
+    path: "/team_lead",
+    element: (
+      <ProtectedRoute allowedRoles={[ROLES.TL]}>
+        <DashboardLayout />
+      </ProtectedRoute>
+    ),
+    children: [
+      { index: true, element: <Navigate to="dashboard" /> },
+      { path: "dashboard", element: <TlDashboard /> },
+      { path: "tasks", element: <TlInternTask /> },
+      { path: "reviews", element: <TlSubmissionsReview /> },
+      { path: "meetings", element: <TlMeetings /> },
+      { path: "chat", element: <TlDepartmentChat /> },
+      { path: "tl-meeting-room/:id", element: <TlMeetingRoom /> },
+    ],
+  },
 
-    /* ================= TEAM LEAD INTERN ================= */
-    {
-        path: "/team_lead_intern",
-        element: (
-            <ProtectedRoute allowedRoles={[ROLES.TLINTERN]}>
-                <DashboardLayout />
-            </ProtectedRoute>
-        ),
-        children: [
-            { index: true, element: <Navigate to="dashboard" /> },
-            { path: "dashboard", element: <TlDashboardIntern /> },
-            { path: "intern-tasks", element: <TlInternTaskIntern /> },
-            { path: "reviews", element: <TlSubmissionsReviewIntern /> },
-            { path: "meetings", element: <TlMeetingsIntern /> },
-            { path: "chat", element: <TlDepartmentIntern /> },
-        ],
-    },
+  /* ================= TEAM LEAD INTERN ================= */
+  {
+    path: "/team_lead_intern",
+    element: (
+      <ProtectedRoute allowedRoles={[ROLES.TLINTERN]}>
+        <DashboardLayout />
+      </ProtectedRoute>
+    ),
+    children: [
+      { index: true, element: <Navigate to="dashboard" /> },
+      { path: "dashboard", element: <TlDashboardIntern /> },
+      { path: "intern-tasks", element: <TlInternTaskIntern /> },
+      { path: "reviews", element: <TlSubmissionsReviewIntern /> },
+      { path: "meetings", element: <TlMeetingsIntern /> },
+      { path: "chat", element: <TlDepartmentIntern /> },
+      { path: "tl-meeting-room/:id", element: <TlMeetingRoom /> },
+    ],
+  },
 
   /* ================= MANAGER ================= */
   {
@@ -175,14 +173,10 @@ export const router = createBrowserRouter([
       // { path: "review-submissions", element: <InternSubmissionsReview /> },
       { path: "meeting-room/:id", element: <MeetingRoom /> },
       // { path: "meeting-room/:id", element: <MeetingRoom /> }
-
-    
     ],
   },
 
-
-
-   {
+  {
     path: "/manager_intern",
     element: (
       <ProtectedRoute allowedRoles={[ROLES.MANAGER_INTERN]}>
@@ -192,18 +186,18 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <Navigate to="dashboard" /> },
       { path: "dashboard", element: <Manager_internDashboard /> },
-     
+
       { path: "intern-analytics", element: <Manager_internAnalytics /> },
       { path: "intern-meetings", element: <Manager_internMeetings /> },
       { path: "chat", element: <Manager_internDepartmentChat /> },
       { path: "reports", element: <Manager_internReports /> },
-      { path: "review-submissions", element: <Manager_internSubmissionsReview /> },
-     
-
-    
+      {
+        path: "review-submissions",
+        element: <Manager_internSubmissionsReview />,
+      },
+      { path: "meeting-room/:id", element: <InternMeetingRoom /> },
     ],
   },
-
 
   /* ================= ADMIN ================= */
   {
@@ -217,7 +211,7 @@ export const router = createBrowserRouter([
       { index: true, element: <Navigate to="dashboard" /> },
       { path: "dashboard", element: <AdminDashboard /> },
       { path: "users", element: <AdminUserManagement /> },
-      { path: "chat", element: <AdminChat /> }, // ADDED
+      // { path: "chat", element: <AdminChat /> }, // ADDED
       { path: "settings", element: <AdminSettings /> },
     ],
   },

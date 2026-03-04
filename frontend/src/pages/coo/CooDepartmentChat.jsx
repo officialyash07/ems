@@ -9,7 +9,6 @@ import {
   MoreVertical,
   File,
 } from "lucide-react";
-import { getSharedTechSupportMessages } from "../../utils/techSupportStore";
 
 /* OPERATIONS DATA */
 const opsData = {
@@ -38,27 +37,21 @@ const opsData = {
   ],
   channels: [
     {
-      id: "ops-general",
-      name: "Operations General",
-      description: "General operations discussion",
+      id: "announcements",
+      name: "Announcements",
+      description: "Important updates only",
       type: "channel",
     },
     {
-      id: "daily-updates",
-      name: "Daily Ops Updates",
-      description: "Execution & status updates",
+      id: "tech-stack",
+      name: "Tech Stack",
+      description: "Discussions on tech stack",
       type: "channel",
     },
     {
-      id: "incidents",
-      name: "Incidents & Escalations",
-      description: "Urgent operational issues",
-      type: "channel",
-    },
-    {
-      id: "tech-support",
-      name: "Tech Support",
-      description: "Shared support inbox",
+      id: "team-updates",
+      name: "Team Updates",
+      description: "Updates from the team",
       type: "channel",
     },
   ],
@@ -72,51 +65,33 @@ const opsData = {
 };
 
 const initialMessages = {
-  "ops-general": [
+  announcements: [
     {
-      from: "System",
-      text: "Welcome to Operations General.",
-      time: "9:00 AM",
-      mine: false,
-    },
-  ],
-  1: [
-    {
-      from: "Sarah Lee",
-      text: "Did you review the logistics report?",
+      from: "COO Office",
+      text: "Operations meeting at 2 PM.",
       time: "10:15 AM",
       mine: false,
+      type: "text",
     },
   ],
+  "tech-stack": [],
+  "team-updates": [],
   "ops-team-group": [],
 };
 
 const CooDepartmentChat = () => {
   const [activeChat, setActiveChat] = useState(opsData.channels[0]);
   const [messages, setMessages] = useState(initialMessages);
-  const [sharedTechSupportMessages, setSharedTechSupportMessages] = useState([]);
   const [input, setInput] = useState("");
   const [groupMembers, setGroupMembers] = useState(opsData.managers);
   const [showAddModal, setShowAddModal] = useState(false);
   const fileInputRef = useRef(null);
 
   useEffect(() => {
-    setSharedTechSupportMessages(getSharedTechSupportMessages());
-
-    const onStorage = (event) => {
-      if (event.key === "ems_shared_tech_support_messages") {
-        setSharedTechSupportMessages(getSharedTechSupportMessages());
-      }
-    };
-
-    window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
+    // Add any necessary global event listeners here
   }, []);
 
-  const currentMessages =
-    activeChat.id === "tech-support"
-      ? sharedTechSupportMessages
-      : messages[activeChat.id] || [];
+  const currentMessages = messages[activeChat.id] || [];
 
   const sendMessage = () => {
     if (!input.trim()) return;
@@ -217,79 +192,83 @@ const CooDepartmentChat = () => {
             ))}
           </div>
 
-          {/* Group Chat Section */}
-          <div className="px-4 py-2 text-[10px] font-bold text-slate-400 flex items-center gap-1 uppercase tracking-widest">
-            <ChevronDown size={12} /> Team Groups
-          </div>
-          <div className="mt-1 space-y-1 px-2 mb-4">
-            <button
-              onClick={() => setActiveChat(opsData.group)}
-              className={`w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-all ${
-                activeChat.id === opsData.group.id
-                  ? "bg-blue-600 text-white shadow-md shadow-blue-200"
-                  : "hover:bg-slate-200 text-slate-700"
-              }`}
-            >
-              <div className="relative flex-shrink-0">
-                <img
-                  src={opsData.group.avatar}
-                  alt=""
-                  className="h-9 w-9 rounded-full object-cover border border-white/20"
-                />
+          {false && (
+            <>
+              {/* Group Chat Section */}
+              <div className="px-4 py-2 text-[10px] font-bold text-slate-400 flex items-center gap-1 uppercase tracking-widest">
+                <ChevronDown size={12} /> Team Groups
               </div>
-              <div className="flex-1 overflow-hidden">
-                <div className="text-sm font-semibold truncate leading-tight">
-                  {opsData.group.name}
-                </div>
-                <div
-                  className={`text-[10px] truncate uppercase font-medium ${activeChat.id === opsData.group.id ? "text-blue-100" : "text-slate-500"}`}
+              <div className="mt-1 space-y-1 px-2 mb-4">
+                <button
+                  onClick={() => setActiveChat(opsData.group)}
+                  className={`w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-all ${
+                    activeChat.id === opsData.group.id
+                      ? "bg-blue-600 text-white shadow-md shadow-blue-200"
+                      : "hover:bg-slate-200 text-slate-700"
+                  }`}
                 >
-                  {opsData.group.role}
-                </div>
-              </div>
-            </button>
-          </div>
-
-          {/* Managers Section */}
-          <div className="px-4 py-2 text-[10px] font-bold text-slate-400 flex items-center gap-1 uppercase tracking-widest">
-            <ChevronDown size={12} /> Ops Managers
-          </div>
-          <div className="mt-1 space-y-1 px-2 pb-6">
-            {opsData.managers.map((m) => (
-              <button
-                key={m.id}
-                onClick={() => setActiveChat({ ...m, type: "individual" })}
-                className={`w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-all ${
-                  activeChat.id === m.id
-                    ? "bg-blue-600 text-white shadow-md shadow-blue-200"
-                    : "hover:bg-slate-200 text-slate-700"
-                }`}
-              >
-                <div className="relative flex-shrink-0">
-                  <img
-                    src={m.avatar}
-                    alt=""
-                    className="h-9 w-9 rounded-full object-cover border border-white/20"
-                  />
-                  {m.online && (
-                    <span
-                      className={`absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 ${activeChat.id === m.id ? "bg-green-400 border-blue-600" : "bg-green-500 border-white"}`}
+                  <div className="relative flex-shrink-0">
+                    <img
+                      src={opsData.group.avatar}
+                      alt=""
+                      className="h-9 w-9 rounded-full object-cover border border-white/20"
                     />
-                  )}
-                </div>
-                <div className="flex-1 overflow-hidden">
-                  <div className="text-sm font-semibold truncate leading-tight">
-                    {m.name}
                   </div>
-                  <div
-                    className={`text-[10px] truncate uppercase font-medium ${activeChat.id === m.id ? "text-blue-100" : "text-slate-500"}`}
+                  <div className="flex-1 overflow-hidden">
+                    <div className="text-sm font-semibold truncate leading-tight">
+                      {opsData.group.name}
+                    </div>
+                    <div
+                      className={`text-[10px] truncate uppercase font-medium ${activeChat.id === opsData.group.id ? "text-blue-100" : "text-slate-500"}`}
+                    >
+                      {opsData.group.role}
+                    </div>
+                  </div>
+                </button>
+              </div>
+
+              {/* Managers Section */}
+              <div className="px-4 py-2 text-[10px] font-bold text-slate-400 flex items-center gap-1 uppercase tracking-widest">
+                <ChevronDown size={12} /> Ops Managers
+              </div>
+              <div className="mt-1 space-y-1 px-2 pb-6">
+                {opsData.managers.map((m) => (
+                  <button
+                    key={m.id}
+                    onClick={() => setActiveChat({ ...m, type: "individual" })}
+                    className={`w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-all ${
+                      activeChat.id === m.id
+                        ? "bg-blue-600 text-white shadow-md shadow-blue-200"
+                        : "hover:bg-slate-200 text-slate-700"
+                    }`}
                   >
-                    {m.role}
-                  </div>
-                </div>
-              </button>
-            ))}
-          </div>
+                    <div className="relative flex-shrink-0">
+                      <img
+                        src={m.avatar}
+                        alt=""
+                        className="h-9 w-9 rounded-full object-cover border border-white/20"
+                      />
+                      {m.online && (
+                        <span
+                          className={`absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 ${activeChat.id === m.id ? "bg-green-400 border-blue-600" : "bg-green-500 border-white"}`}
+                        />
+                      )}
+                    </div>
+                    <div className="flex-1 overflow-hidden">
+                      <div className="text-sm font-semibold truncate leading-tight">
+                        {m.name}
+                      </div>
+                      <div
+                        className={`text-[10px] truncate uppercase font-medium ${activeChat.id === m.id ? "text-blue-100" : "text-slate-500"}`}
+                      >
+                        {m.role}
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
         </div>
       </div>
 

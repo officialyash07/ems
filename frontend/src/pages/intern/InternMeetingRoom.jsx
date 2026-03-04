@@ -37,6 +37,17 @@ const InternMeetingRoom = () => {
     streamRef.current?.getTracks().forEach((track) => track.stop());
   };
 
+  const leaveMeeting = () => {
+    stopCurrentStream();
+    if (
+      mediaRecorderRef.current &&
+      mediaRecorderRef.current.state !== "inactive"
+    ) {
+      mediaRecorderRef.current.stop();
+    }
+    navigate(-1);
+  };
+
   const requestMedia = async ({ audio = true, video = true } = {}) => {
     if (!navigator.mediaDevices?.getUserMedia) {
       setMediaError("Media devices are not supported in this browser.");
@@ -303,7 +314,7 @@ const InternMeetingRoom = () => {
         </button>
 
         {/* LEAVE BUTTON */}
-        <button onClick={() => navigate(-1)}>
+        <button onClick={leaveMeeting}>
           <PhoneOff className="text-red-500 hover:scale-110 transition-transform" />
         </button>
 

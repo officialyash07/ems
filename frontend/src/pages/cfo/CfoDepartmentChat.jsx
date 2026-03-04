@@ -3,12 +3,12 @@ import {
   Search,
   Send,
   Paperclip,
+  Hash,
   ChevronDown,
   MessageSquare,
   MoreVertical,
   File,
 } from "lucide-react";
-import { getSharedTechSupportMessages } from "../../utils/techSupportStore";
 
 const people = {
   members: [
@@ -41,6 +41,26 @@ const people = {
       avatar: "https://randomuser.me/api/portraits/women/44.jpg",
     },
   ],
+  channels: [
+    {
+      id: "announcements",
+      name: "Announcements",
+      description: "Important updates only",
+      type: "channel",
+    },
+    {
+      id: "tech-stack",
+      name: "Tech Stack",
+      description: "Discussions on tech stack",
+      type: "channel",
+    },
+    {
+      id: "team-updates",
+      name: "Team Updates",
+      description: "Updates from the team",
+      type: "channel",
+    },
+  ],
   group: {
     id: 100,
     name: "Department Group",
@@ -56,35 +76,33 @@ const people = {
 };
 
 const initialMessages = {
+  announcements: [
+    {
+      from: "CFO Office",
+      text: "Quarterly budget review scheduled for next week.",
+      time: "Yesterday",
+      mine: false,
+      type: "text",
+    },
+  ],
+  "tech-stack": [],
+  "team-updates": [],
   100: [],
 };
 
 const CfoDepartmentChat = () => {
-  const [activeChat, setActiveChat] = useState(people.members[0]);
+  const [activeChat, setActiveChat] = useState(people.channels[0]);
   const [messages, setMessages] = useState(initialMessages);
-  const [sharedTechSupportMessages, setSharedTechSupportMessages] = useState([]);
   const [input, setInput] = useState("");
   const [groupMembers, setGroupMembers] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const fileInputRef = useRef(null);
 
   useEffect(() => {
-    setSharedTechSupportMessages(getSharedTechSupportMessages());
-
-    const onStorage = (event) => {
-      if (event.key === "ems_shared_tech_support_messages") {
-        setSharedTechSupportMessages(getSharedTechSupportMessages());
-      }
-    };
-
-    window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
+    // Add any necessary global event listeners here
   }, []);
 
-  const currentMessages =
-    activeChat.id === "tech-support"
-      ? sharedTechSupportMessages
-      : messages[activeChat.id] || [];
+  const currentMessages = messages[activeChat.id] || [];
 
   const sendMessage = () => {
     if (!input.trim()) return;
@@ -158,106 +176,145 @@ const CfoDepartmentChat = () => {
         </div>
 
         <div className="flex-1 overflow-y-auto custom-scrollbar">
-          {/* Members Section */}
+          {/* Channel List */}
           <div className="px-4 py-2 text-[10px] font-bold text-slate-400 flex items-center gap-1 uppercase tracking-widest">
-            <ChevronDown size={12} /> Members
+            <Hash size={12} /> Channels
           </div>
 
-          <div className="mt-1 space-y-1 px-2">
-            {people.members.map((person) => (
+          <div className="mt-1 space-y-1 px-2 mb-4">
+            {people.channels.map((c) => (
               <button
-                key={person.id}
-                onClick={() => setActiveChat(person)}
+                key={c.id}
+                onClick={() => setActiveChat(c)}
                 className={`w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-all ${
-                  activeChat.id === person.id
+                  activeChat.id === c.id
                     ? "bg-blue-600 text-white shadow-md shadow-blue-200"
                     : "hover:bg-slate-200 text-slate-700"
                 }`}
               >
-                <div className="relative flex-shrink-0">
-                  <img
-                    src={person.avatar}
-                    alt=""
-                    className="h-9 w-9 rounded-full object-cover border border-white/20"
-                  />
-                  {person.online && (
-                    <span
-                      className={`absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 ${activeChat.id === person.id ? "bg-green-400 border-blue-600" : "bg-green-500 border-white"}`}
-                    />
-                  )}
+                <div
+                  className={`h-9 w-9 rounded-full flex items-center justify-center flex-shrink-0 ${activeChat.id === c.id ? "bg-blue-500 text-white" : "bg-slate-200 text-slate-500"}`}
+                >
+                  <Hash size={18} />
                 </div>
                 <div className="flex-1 overflow-hidden">
                   <div className="text-sm font-semibold truncate leading-tight">
-                    {person.name}
+                    {c.name}
                   </div>
                   <div
-                    className={`text-[10px] truncate uppercase font-medium ${activeChat.id === person.id ? "text-blue-100" : "text-slate-500"}`}
+                    className={`text-[10px] truncate uppercase font-medium ${activeChat.id === c.id ? "text-blue-100" : "text-slate-500"}`}
                   >
-                    {person.role}
+                    {c.description}
                   </div>
                 </div>
               </button>
             ))}
           </div>
 
-          {/* Group Chat Section */}
-          <div className="mt-6 px-4 py-2 text-[10px] font-bold text-slate-400 flex items-center gap-1 uppercase tracking-widest">
-            <ChevronDown size={12} /> Groups
-          </div>
-          <div className="mt-1 space-y-1 px-2 pb-6">
-            <button
-              onClick={() => setActiveChat(people.group)}
-              className={`w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-all ${
-                activeChat.id === people.group.id
-                  ? "bg-blue-600 text-white shadow-md shadow-blue-200"
-                  : "hover:bg-slate-200 text-slate-700"
-              }`}
-            >
-              <div className="relative flex-shrink-0">
-                <img
-                  src={people.group.avatar}
-                  alt=""
-                  className="h-9 w-9 rounded-full object-cover border border-white/20"
-                />
+          {false && (
+            <>
+              {/* Members Section */}
+              <div className="px-4 py-2 text-[10px] font-bold text-slate-400 flex items-center gap-1 uppercase tracking-widest">
+                <ChevronDown size={12} /> Members
               </div>
-              <div className="flex-1 overflow-hidden">
-                <div className="text-sm font-semibold truncate leading-tight">
-                  {people.group.name}
-                </div>
-                <div
-                  className={`text-[10px] truncate uppercase font-medium ${activeChat.id === people.group.id ? "text-blue-100" : "text-slate-500"}`}
+
+              <div className="mt-1 space-y-1 px-2">
+                {people.members.map((person) => (
+                  <button
+                    key={person.id}
+                    onClick={() => setActiveChat(person)}
+                    className={`w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-all ${
+                      activeChat.id === person.id
+                        ? "bg-blue-600 text-white shadow-md shadow-blue-200"
+                        : "hover:bg-slate-200 text-slate-700"
+                    }`}
+                  >
+                    <div className="relative flex-shrink-0">
+                      <img
+                        src={person.avatar}
+                        alt=""
+                        className="h-9 w-9 rounded-full object-cover border border-white/20"
+                      />
+                      {person.online && (
+                        <span
+                          className={`absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 ${activeChat.id === person.id ? "bg-green-400 border-blue-600" : "bg-green-500 border-white"}`}
+                        />
+                      )}
+                    </div>
+                    <div className="flex-1 overflow-hidden">
+                      <div className="text-sm font-semibold truncate leading-tight">
+                        {person.name}
+                      </div>
+                      <div
+                        className={`text-[10px] truncate uppercase font-medium ${activeChat.id === person.id ? "text-blue-100" : "text-slate-500"}`}
+                      >
+                        {person.role}
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              {/* Group Chat Section */}
+              <div className="mt-6 px-4 py-2 text-[10px] font-bold text-slate-400 flex items-center gap-1 uppercase tracking-widest">
+                <ChevronDown size={12} /> Groups
+              </div>
+              <div className="mt-1 space-y-1 px-2 pb-6">
+                <button
+                  onClick={() => setActiveChat(people.group)}
+                  className={`w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-all ${
+                    activeChat.id === people.group.id
+                      ? "bg-blue-600 text-white shadow-md shadow-blue-200"
+                      : "hover:bg-slate-200 text-slate-700"
+                  }`}
                 >
-                  {people.group.role}
-                </div>
-              </div>
-            </button>
-            <button
-              onClick={() => setActiveChat(people.techSupport)}
-              className={`w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-all ${
-                activeChat.id === people.techSupport.id
-                  ? "bg-blue-600 text-white shadow-md shadow-blue-200"
-                  : "hover:bg-slate-200 text-slate-700"
-              }`}
-            >
-              <div className="relative flex-shrink-0">
-                <img
-                  src={people.techSupport.avatar}
-                  alt=""
-                  className="h-9 w-9 rounded-full object-cover border border-white/20"
-                />
-              </div>
-              <div className="flex-1 overflow-hidden">
-                <div className="text-sm font-semibold truncate leading-tight">
-                  {people.techSupport.name}
-                </div>
-                <div
-                  className={`text-[10px] truncate uppercase font-medium ${activeChat.id === people.techSupport.id ? "text-blue-100" : "text-slate-500"}`}
+                  <div className="relative flex-shrink-0">
+                    <img
+                      src={people.group.avatar}
+                      alt=""
+                      className="h-9 w-9 rounded-full object-cover border border-white/20"
+                    />
+                  </div>
+                  <div className="flex-1 overflow-hidden">
+                    <div className="text-sm font-semibold truncate leading-tight">
+                      {people.group.name}
+                    </div>
+                    <div
+                      className={`text-[10px] truncate uppercase font-medium ${activeChat.id === people.group.id ? "text-blue-100" : "text-slate-500"}`}
+                    >
+                      {people.group.role}
+                    </div>
+                  </div>
+                </button>
+                <button
+                  onClick={() => setActiveChat(people.techSupport)}
+                  className={`w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-all ${
+                    activeChat.id === people.techSupport.id
+                      ? "bg-blue-600 text-white shadow-md shadow-blue-200"
+                      : "hover:bg-slate-200 text-slate-700"
+                  }`}
                 >
-                  {people.techSupport.role}
-                </div>
+                  <div className="relative flex-shrink-0">
+                    <img
+                      src={people.techSupport.avatar}
+                      alt=""
+                      className="h-9 w-9 rounded-full object-cover border border-white/20"
+                    />
+                  </div>
+                  <div className="flex-1 overflow-hidden">
+                    <div className="text-sm font-semibold truncate leading-tight">
+                      {people.techSupport.name}
+                    </div>
+                    <div
+                      className={`text-[10px] truncate uppercase font-medium ${activeChat.id === people.techSupport.id ? "text-blue-100" : "text-slate-500"}`}
+                    >
+                      {people.techSupport.role}
+                    </div>
+                  </div>
+                </button>
               </div>
-            </button>
-          </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -274,7 +331,7 @@ const CfoDepartmentChat = () => {
               />
             ) : (
               <div className="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 border border-blue-100">
-                <MessageSquare size={20} />
+                <Hash size={20} />
               </div>
             )}
             <div>
@@ -285,8 +342,8 @@ const CfoDepartmentChat = () => {
                 {activeChat.online && (
                   <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse"></span>
                 )}
-                {activeChat.role}
-                {activeChat.id === people.group.id && (
+                {activeChat.description || activeChat.role}
+                {activeChat.type === "group" && (
                   <span className="ml-2 text-slate-400 font-normal">
                     • {groupMembers.length} Members
                   </span>
