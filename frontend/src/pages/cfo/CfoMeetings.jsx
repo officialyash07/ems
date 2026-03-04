@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Plus, Calendar, Users, X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const initialMeetings = [
   {
@@ -26,6 +27,7 @@ const initialMeetings = [
 ];
 
 const CfoMeetings = () => {
+  const navigate = useNavigate();
   const [meetings, setMeetings] = useState(initialMeetings);
   const [open, setOpen] = useState(false);
 
@@ -120,8 +122,11 @@ const CfoMeetings = () => {
                 {m.status}
               </span>
 
-              <button className="rounded-md border border-indigo-600 px-4 py-1.5 text-sm font-medium text-indigo-600 hover:bg-indigo-50 transition-colors h-9">
-                Details
+              <button
+                onClick={() => navigate(`/cfo/cfo-meeting-room/${m.id}`)}
+                className="rounded-md border border-indigo-600 px-4 py-1.5 text-sm font-medium text-indigo-600 hover:bg-indigo-50 transition-colors h-9"
+              >
+                Join
               </button>
             </div>
           </div>
