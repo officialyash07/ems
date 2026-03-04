@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   Mic,
   MicOff,
@@ -11,10 +11,12 @@ import {
   Link,
   Flag,
   Circle,
+  PhoneOff,
 } from "lucide-react";
 
 const CeoMeetingRooms = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
 
   const [micOn, setMicOn] = useState(true);
   const [cameraOn, setCameraOn] = useState(true);
@@ -36,6 +38,17 @@ const CeoMeetingRooms = () => {
     streamRef.current?.getTracks().forEach((track) => track.stop());
   };
 
+  const leaveMeeting = () => {
+    stopCurrentStream();
+    if (
+      mediaRecorderRef.current &&
+      mediaRecorderRef.current.state !== "inactive"
+    ) {
+      mediaRecorderRef.current.stop();
+    }
+    navigate(-1);
+  };
+
   const requestMedia = async ({ audio = true, video = true } = {}) => {
     if (!navigator.mediaDevices?.getUserMedia) {
       setMediaError("Media devices are not supported in this browser.");
@@ -45,7 +58,10 @@ const CeoMeetingRooms = () => {
     }
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio, video });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio,
+        video,
+      });
       stopCurrentStream();
       streamRef.current = stream;
 
@@ -58,7 +74,9 @@ const CeoMeetingRooms = () => {
       setMediaError("");
       return stream;
     } catch (error) {
-      setMediaError("Camera/Microphone permission is blocked. Please allow access in browser site settings.");
+      setMediaError(
+        "Camera/Microphone permission is blocked. Please allow access in browser site settings.",
+      );
       setMicOn(false);
       setCameraOn(false);
       return null;
@@ -165,7 +183,10 @@ const CeoMeetingRooms = () => {
     getMedia();
 
     return () => {
-      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+      if (
+        mediaRecorderRef.current &&
+        mediaRecorderRef.current.state !== "inactive"
+      ) {
         mediaRecorderRef.current.stop();
       }
       stopCurrentStream();
@@ -213,7 +234,10 @@ const CeoMeetingRooms = () => {
 
   // Stop Recording
   const stopRecording = () => {
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+    if (
+      mediaRecorderRef.current &&
+      mediaRecorderRef.current.state !== "inactive"
+    ) {
       mediaRecorderRef.current.stop();
     }
     setRecording(false);
@@ -230,7 +254,9 @@ const CeoMeetingRooms = () => {
       {/* Video Area */}
       <div className="flex-1 flex items-center justify-center relative">
         {mediaError ? (
-          <p className="text-red-400 text-sm mb-4 absolute text-center px-4">{mediaError}</p>
+          <p className="text-red-400 text-sm mb-4 absolute text-center px-4">
+            {mediaError}
+          </p>
         ) : null}
         <video
           ref={videoRef}
@@ -242,7 +268,9 @@ const CeoMeetingRooms = () => {
 
         {isChatOpen ? (
           <div className="absolute right-4 top-4 bottom-4 w-80 bg-gray-800 border border-gray-700 rounded-lg flex flex-col">
-            <div className="p-3 border-b border-gray-700 font-medium">Meeting Chat</div>
+            <div className="p-3 border-b border-gray-700 font-medium">
+              Meeting Chat
+            </div>
             <div className="flex-1 overflow-y-auto p-3 space-y-2">
               {messages.map((message) => (
                 <div key={message.id} className="text-sm">
@@ -264,7 +292,10 @@ const CeoMeetingRooms = () => {
                 placeholder="Type a message"
                 className="flex-1 bg-gray-900 border border-gray-700 rounded px-2 py-1 text-sm outline-none"
               />
-              <button onClick={sendMessage} className="px-3 py-1 text-sm bg-blue-600 rounded">
+              <button
+                onClick={sendMessage}
+                className="px-3 py-1 text-sm bg-blue-600 rounded"
+              >
                 Send
               </button>
             </div>
@@ -274,9 +305,7 @@ const CeoMeetingRooms = () => {
 
       {/* Controls */}
       <div className="bg-gray-800 p-4 flex justify-center gap-6">
-        <button onClick={toggleMic}>
-          {micOn ? <Mic /> : <MicOff />}
-        </button>
+        <button onClick={toggleMic}>{micOn ? <Mic /> : <MicOff />}</button>
 
         <button onClick={toggleCamera}>
           {cameraOn ? <Video /> : <VideoOff />}
@@ -304,12 +333,20 @@ const CeoMeetingRooms = () => {
           <Link />
         </button>
 
-        <button>
+        {/* <button>
           <Flag />
-        </button>
+        </button> */}
 
         <button onClick={toggleScreenShare}>
           <ScreenShare className={isScreenSharing ? "text-green-400" : ""} />
+        </button>
+
+        {/* LEAVE MEETING */}
+        <button
+          onClick={leaveMeeting}
+          className="text-red-500 hover:text-red-400"
+        >
+          <PhoneOff />
         </button>
       </div>
     </div>

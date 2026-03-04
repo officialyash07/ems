@@ -7,9 +7,7 @@ import {
   ChevronDown,
   MessageSquare,
   MoreVertical,
-  File,
 } from "lucide-react";
-import { getSharedTechSupportMessages } from "../../utils/techSupportStore";
 
 /* TECHNOLOGY DEPARTMENT DATA */
 const ctoData = {
@@ -38,27 +36,21 @@ const ctoData = {
   ],
   channels: [
     {
-      id: "general",
-      name: "General Chat",
-      description: "Main department discussion",
-      type: "channel",
-    },
-    {
       id: "announcements",
       name: "Announcements",
       description: "Important updates only",
       type: "channel",
     },
     {
-      id: "tech-support",
-      name: "Tech Support",
-      description: "Help with tools & infra",
+      id: "tech-stack",
+      name: "Tech Stack",
+      description: "Discussions on tech stack",
       type: "channel",
     },
     {
-      id: "random",
-      name: "Random",
-      description: "Coffee breaks & fun",
+      id: "team-updates",
+      name: "Team Updates",
+      description: "Updates from the team",
       type: "channel",
     },
   ],
@@ -73,22 +65,6 @@ const ctoData = {
 
 /* INITIAL MESSAGES */
 const initialMessages = {
-  general: [
-    {
-      from: "John Williams",
-      text: "Welcome to the General group!",
-      time: "9:10 AM",
-      mine: false,
-      type: "text",
-    },
-    {
-      from: "You",
-      text: "Happy to be here.",
-      time: "9:12 AM",
-      mine: true,
-      type: "text",
-    },
-  ],
   announcements: [
     {
       from: "CTO Office",
@@ -98,37 +74,24 @@ const initialMessages = {
       type: "text",
     },
   ],
+  "tech-stack": [],
+  "team-updates": [],
   "tech-core-group": [],
-  "tech-support": [],
-  random: [],
 };
 
 const CtoDepartmentChat = () => {
   const [activeChat, setActiveChat] = useState(ctoData.channels[0]);
   const [messages, setMessages] = useState(initialMessages);
-  const [sharedTechSupportMessages, setSharedTechSupportMessages] = useState([]);
   const [input, setInput] = useState("");
   const [groupMembers, setGroupMembers] = useState(ctoData.managers);
   const [showAddModal, setShowAddModal] = useState(false);
   const fileInputRef = useRef(null);
 
   useEffect(() => {
-    setSharedTechSupportMessages(getSharedTechSupportMessages());
-
-    const onStorage = (event) => {
-      if (event.key === "ems_shared_tech_support_messages") {
-        setSharedTechSupportMessages(getSharedTechSupportMessages());
-      }
-    };
-
-    window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
+    // Add any necessary global event listeners here
   }, []);
 
-  const currentMessages =
-    activeChat.id === "tech-support"
-      ? sharedTechSupportMessages
-      : messages[activeChat.id] || [];
+  const currentMessages = messages[activeChat.id] || [];
 
   const sendMessage = () => {
     if (!input.trim()) return;
@@ -234,79 +197,83 @@ const CtoDepartmentChat = () => {
             ))}
           </div>
 
-          {/* Team Groups Section */}
-          <div className="px-4 py-2 text-[10px] font-bold text-slate-400 flex items-center gap-1 uppercase tracking-widest">
-            <ChevronDown size={12} /> Team Groups
-          </div>
-          <div className="mt-1 space-y-1 px-2 mb-4">
-            <button
-              onClick={() => setActiveChat(ctoData.group)}
-              className={`w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-all ${
-                activeChat.id === ctoData.group.id
-                  ? "bg-blue-600 text-white shadow-md shadow-blue-200"
-                  : "hover:bg-slate-200 text-slate-700"
-              }`}
-            >
-              <div className="relative flex-shrink-0">
-                <img
-                  src={ctoData.group.avatar}
-                  alt=""
-                  className="h-9 w-9 rounded-full object-cover border border-white/20"
-                />
+          {false && (
+            <>
+              {/* Team Groups Section */}
+              <div className="px-4 py-2 text-[10px] font-bold text-slate-400 flex items-center gap-1 uppercase tracking-widest">
+                <ChevronDown size={12} /> Team Groups
               </div>
-              <div className="flex-1 overflow-hidden">
-                <div className="text-sm font-semibold truncate leading-tight">
-                  {ctoData.group.name}
-                </div>
-                <div
-                  className={`text-[10px] truncate uppercase font-medium ${activeChat.id === ctoData.group.id ? "text-blue-100" : "text-slate-500"}`}
+              <div className="mt-1 space-y-1 px-2 mb-4">
+                <button
+                  onClick={() => setActiveChat(ctoData.group)}
+                  className={`w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-all ${
+                    activeChat.id === ctoData.group.id
+                      ? "bg-blue-600 text-white shadow-md shadow-blue-200"
+                      : "hover:bg-slate-200 text-slate-700"
+                  }`}
                 >
-                  {ctoData.group.role}
-                </div>
-              </div>
-            </button>
-          </div>
-
-          {/* Tech Leads Section (Individual) */}
-          <div className="px-4 py-2 text-[10px] font-bold text-slate-400 flex items-center gap-1 uppercase tracking-widest">
-            <ChevronDown size={12} /> Tech Leads
-          </div>
-          <div className="mt-1 space-y-1 px-2 pb-6">
-            {ctoData.managers.map((m) => (
-              <button
-                key={m.id}
-                onClick={() => setActiveChat({ ...m, type: "individual" })}
-                className={`w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-all ${
-                  activeChat.id === m.id
-                    ? "bg-blue-600 text-white shadow-md shadow-blue-200"
-                    : "hover:bg-slate-200 text-slate-700"
-                }`}
-              >
-                <div className="relative flex-shrink-0">
-                  <img
-                    src={m.avatar}
-                    alt=""
-                    className="h-9 w-9 rounded-full object-cover border border-white/20"
-                  />
-                  {m.online && (
-                    <span
-                      className={`absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 ${activeChat.id === m.id ? "bg-green-400 border-blue-600" : "bg-green-500 border-white"}`}
+                  <div className="relative flex-shrink-0">
+                    <img
+                      src={ctoData.group.avatar}
+                      alt=""
+                      className="h-9 w-9 rounded-full object-cover border border-white/20"
                     />
-                  )}
-                </div>
-                <div className="flex-1 overflow-hidden">
-                  <div className="text-sm font-semibold truncate leading-tight">
-                    {m.name}
                   </div>
-                  <div
-                    className={`text-[10px] truncate uppercase font-medium ${activeChat.id === m.id ? "text-blue-100" : "text-slate-500"}`}
+                  <div className="flex-1 overflow-hidden">
+                    <div className="text-sm font-semibold truncate leading-tight">
+                      {ctoData.group.name}
+                    </div>
+                    <div
+                      className={`text-[10px] truncate uppercase font-medium ${activeChat.id === ctoData.group.id ? "text-blue-100" : "text-slate-500"}`}
+                    >
+                      {ctoData.group.role}
+                    </div>
+                  </div>
+                </button>
+              </div>
+
+              {/* Tech Leads Section (Individual) */}
+              <div className="px-4 py-2 text-[10px] font-bold text-slate-400 flex items-center gap-1 uppercase tracking-widest">
+                <ChevronDown size={12} /> Tech Leads
+              </div>
+              <div className="mt-1 space-y-1 px-2 pb-6">
+                {ctoData.managers.map((m) => (
+                  <button
+                    key={m.id}
+                    onClick={() => setActiveChat({ ...m, type: "individual" })}
+                    className={`w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-all ${
+                      activeChat.id === m.id
+                        ? "bg-blue-600 text-white shadow-md shadow-blue-200"
+                        : "hover:bg-slate-200 text-slate-700"
+                    }`}
                   >
-                    {m.role}
-                  </div>
-                </div>
-              </button>
-            ))}
-          </div>
+                    <div className="relative flex-shrink-0">
+                      <img
+                        src={m.avatar}
+                        alt=""
+                        className="h-9 w-9 rounded-full object-cover border border-white/20"
+                      />
+                      {m.online && (
+                        <span
+                          className={`absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 ${activeChat.id === m.id ? "bg-green-400 border-blue-600" : "bg-green-500 border-white"}`}
+                        />
+                      )}
+                    </div>
+                    <div className="flex-1 overflow-hidden">
+                      <div className="text-sm font-semibold truncate leading-tight">
+                        {m.name}
+                      </div>
+                      <div
+                        className={`text-[10px] truncate uppercase font-medium ${activeChat.id === m.id ? "text-blue-100" : "text-slate-500"}`}
+                      >
+                        {m.role}
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
         </div>
       </div>
 
