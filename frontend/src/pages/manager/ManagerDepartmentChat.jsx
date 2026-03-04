@@ -147,6 +147,10 @@ const initialMessages = {
   ],
 };
 
+/**
+ * Departmental communication hub for managers.
+ * Supports team updates, peer coordination, and centralized announcement broadcasting.
+ */
 const ManagerDepartmentChat = () => {
   const [activeChat, setActiveChat] = useState(managerData.channels[0]);
   const [messages, setMessages] = useState(initialMessages);
@@ -174,6 +178,9 @@ const ManagerDepartmentChat = () => {
       ? sharedTechSupportMessages
       : messages[activeChat.id] || [];
 
+  /**
+   * Dispatches messages to the current channel or shared tech support store.
+   */
   const sendMessage = () => {
     if (!input.trim()) return;
 
@@ -206,6 +213,12 @@ const ManagerDepartmentChat = () => {
     setInput("");
   };
 
+  /**
+   * Handles local file attachments in the chat interface.
+   * Creates an object URL for previewing before actual server upload.
+   *
+   * @param {Event} e - Input change event
+   */
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;

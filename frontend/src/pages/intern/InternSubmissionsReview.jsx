@@ -29,47 +29,53 @@ const initialData = [
   },
 ];
 
+/**
+ * Peer or manager review interface for intern submissions.
+ * Allows evaluators to approve/reject work and provide feedback.
+ */
 const InternSubmissionsReview = () => {
   const [submissions, setSubmissions] = useState(initialData);
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
 
   // Approve / Reject
+  /**
+   * Updates the status of a submission and records the reviewer's role.
+   *
+   * @param {number|string} id - Submission identifier
+   * @param {string} status - New status ('approved', 'rejected')
+   */
   const handleStatusChange = (id, status) => {
     setSubmissions((prev) =>
       prev.map((item) =>
-        item.id === id
-          ? { ...item, status, reviewer: currentUser.role }
-          : item
-      )
+        item.id === id ? { ...item, status, reviewer: currentUser.role } : item,
+      ),
     );
   };
 
   // Add Comment
+  /**
+   * Appends a text comment to a specific submission.
+   *
+   * @param {number|string} id - Submission identifier
+   * @param {string} text - Comment content
+   */
   const handleAddComment = (id, text) => {
     setSubmissions((prev) =>
       prev.map((item) =>
-        item.id === id
-          ? { ...item, comments: [...item.comments, text] }
-          : item
-      )
+        item.id === id ? { ...item, comments: [...item.comments, text] } : item,
+      ),
     );
   };
 
   // Filter + Search
   const filteredData = submissions
-    .filter((s) =>
-      s.intern.toLowerCase().includes(search.toLowerCase())
-    )
-    .filter((s) =>
-      filterStatus === "all" ? true : s.status === filterStatus
-    );
+    .filter((s) => s.intern.toLowerCase().includes(search.toLowerCase()))
+    .filter((s) => (filterStatus === "all" ? true : s.status === filterStatus));
 
   return (
     <div className="space-y-6 p-6">
-      <h1 className="text-2xl font-semibold">
-        Intern Submissions Review
-      </h1>
+      <h1 className="text-2xl font-semibold">Intern Submissions Review</h1>
 
       {/* Search + Filter */}
       <div className="flex gap-4">
@@ -101,40 +107,30 @@ const InternSubmissionsReview = () => {
               <div>
                 <p className="font-semibold">{item.intern}</p>
                 <p>{item.task}</p>
-                <p className="text-sm text-gray-500">
-                  {item.submittedOn}
-                </p>
+                <p className="text-sm text-gray-500">{item.submittedOn}</p>
                 <p className="text-sm">
-                  Status:{" "}
-                  <span className="font-medium">
-                    {item.status}
-                  </span>
+                  Status: <span className="font-medium">{item.status}</span>
                 </p>
               </div>
 
               {/* Role-based Buttons */}
-              {currentUser.role !== "Intern" &&
-                item.status === "pending" && (
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() =>
-                        handleStatusChange(item.id, "approved")
-                      }
-                      class="bg-green-500 text-white h-7 px-3 text-sm rounded-md"
-                    >
-                      Approve
-                    </button>
+              {currentUser.role !== "Intern" && item.status === "pending" && (
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleStatusChange(item.id, "approved")}
+                    class="bg-green-500 text-white h-7 px-3 text-sm rounded-md"
+                  >
+                    Approve
+                  </button>
 
-                    <button
-                      onClick={() =>
-                        handleStatusChange(item.id, "rejected")
-                      }
-                      class="bg-red-500 text-white h-7 px-3 text-sm rounded-md"
-                    >
-                      Reject
-                    </button>
-                  </div>
-                )}
+                  <button
+                    onClick={() => handleStatusChange(item.id, "rejected")}
+                    class="bg-red-500 text-white h-7 px-3 text-sm rounded-md"
+                  >
+                    Reject
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Reviewer */}

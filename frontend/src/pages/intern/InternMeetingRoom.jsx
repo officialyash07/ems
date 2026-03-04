@@ -13,6 +13,10 @@ import {
   PhoneOff,
 } from "lucide-react";
 
+/**
+ * Multi-user meeting room interface for interns.
+ * Supports media streaming, screen sharing, recording, and integrated chat.
+ */
 const InternMeetingRoom = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -33,10 +37,16 @@ const InternMeetingRoom = () => {
   const streamRef = useRef(null);
   const videoRef = useRef(null);
 
+  /**
+   * Releases all active MediaStream tracks controlled by this component.
+   */
   const stopCurrentStream = () => {
     streamRef.current?.getTracks().forEach((track) => track.stop());
   };
 
+  /**
+   * Concludes the meeting session, cleaning up streams and recordings before navigating away.
+   */
   const leaveMeeting = () => {
     stopCurrentStream();
     if (
@@ -48,6 +58,12 @@ const InternMeetingRoom = () => {
     navigate(-1);
   };
 
+  /**
+   * Core media acquisition logic using the browser MediaDevices API.
+   *
+   * @param {object} constraints - Hardware requirements (audio/video)
+   * @returns {Promise<MediaStream|null>} The successful stream or null
+   */
   const requestMedia = async ({ audio = true, video = true } = {}) => {
     if (!navigator.mediaDevices?.getUserMedia) {
       setMediaError("Media devices are not supported in this browser.");
@@ -82,6 +98,9 @@ const InternMeetingRoom = () => {
     }
   };
 
+  /**
+   * Toggles the active state of the microphone hardware track.
+   */
   const toggleMic = () => {
     if (!streamRef.current) {
       requestMedia({ audio: true, video: cameraOn });
@@ -99,6 +118,9 @@ const InternMeetingRoom = () => {
     setMicOn(nextMicOn);
   };
 
+  /**
+   * Toggles the localized camera stream visibility.
+   */
   const toggleCamera = () => {
     if (!streamRef.current) {
       requestMedia({ audio: micOn, video: true });
@@ -116,12 +138,18 @@ const InternMeetingRoom = () => {
     setCameraOn(nextCameraOn);
   };
 
+  /**
+   * Reverts from screen sharing back to the localized camera feed.
+   */
   const stopScreenShare = async () => {
     setIsScreenSharing(false);
     stopCurrentStream();
     await requestMedia({ audio: true, video: true });
   };
 
+  /**
+   * Initiates browser display capture to share the screen with participants.
+   */
   const toggleScreenShare = async () => {
     if (isScreenSharing) {
       await stopScreenShare();
@@ -160,6 +188,9 @@ const InternMeetingRoom = () => {
     }
   };
 
+  /**
+   * Appends a new message to the local meeting chat history.
+   */
   const sendMessage = () => {
     const trimmedMessage = chatInput.trim();
     if (!trimmedMessage) {
@@ -193,6 +224,9 @@ const InternMeetingRoom = () => {
   }, []);
 
   // Start Recording
+  /**
+   * Commences localized recording of the active meeting stream.
+   */
   const startRecording = async () => {
     let stream = streamRef.current;
 
@@ -232,6 +266,9 @@ const InternMeetingRoom = () => {
   };
 
   // Stop Recording
+  /**
+   * Concludes the recording session and triggers a webm file download.
+   */
   const stopRecording = () => {
     if (
       mediaRecorderRef.current &&

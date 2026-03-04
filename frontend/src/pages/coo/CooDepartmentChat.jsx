@@ -79,6 +79,10 @@ const initialMessages = {
   "ops-team-group": [],
 };
 
+/**
+ * High-level internal communication platform connecting the COO with operations managers.
+ * Encompasses channel broadcasts, individual messaging, and file sharing utilities.
+ */
 const CooDepartmentChat = () => {
   const [activeChat, setActiveChat] = useState(opsData.channels[0]);
   const [messages, setMessages] = useState(initialMessages);
@@ -93,6 +97,10 @@ const CooDepartmentChat = () => {
 
   const currentMessages = messages[activeChat.id] || [];
 
+  /**
+   * Translates the current text input into a standardized message object and appends
+   * it to the active conversational thread.
+   */
   const sendMessage = () => {
     if (!input.trim()) return;
 
@@ -114,6 +122,12 @@ const CooDepartmentChat = () => {
     setInput("");
   };
 
+  /**
+   * Captures raw files emitted by the upload input, staging them as localized ObjectURLs
+   * prior to injecting them into the chat stream.
+   *
+   * @param {Event} e - The HTML input change event
+   */
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -137,6 +151,11 @@ const CooDepartmentChat = () => {
     e.target.value = null;
   };
 
+  /**
+   * Attaches an operational manager or team member to the active group participant roster.
+   *
+   * @param {object} person - The profile entity to include
+   */
   const addToGroup = (person) => {
     if (!groupMembers.some((m) => m.id === person.id)) {
       setGroupMembers([...groupMembers, person]);

@@ -13,6 +13,10 @@ import {
   PhoneOff,
 } from "lucide-react";
 
+/**
+ * Real-time meeting environment for Team Leads.
+ * Handles AV streams, screen sharing, meeting recording, and in-call chat.
+ */
 const TlMeetingRoom = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -37,6 +41,12 @@ const TlMeetingRoom = () => {
     streamRef.current?.getTracks().forEach((track) => track.stop());
   };
 
+  /**
+   * Requests access to hardware media devices (camera/microphone).
+   *
+   * @param {object} constraints - Requested media types
+   * @returns {Promise<MediaStream|null>} The acquired stream or null
+   */
   const requestMedia = async ({ audio = true, video = true } = {}) => {
     if (!navigator.mediaDevices?.getUserMedia) {
       setMediaError("Media devices are not supported in this browser.");
@@ -71,6 +81,9 @@ const TlMeetingRoom = () => {
     }
   };
 
+  /**
+   * Toggles the hardware microphone status.
+   */
   const toggleMic = () => {
     if (!streamRef.current) {
       requestMedia({ audio: true, video: cameraOn });
@@ -88,6 +101,9 @@ const TlMeetingRoom = () => {
     setMicOn(nextMicOn);
   };
 
+  /**
+   * Toggles the hardware camera status.
+   */
   const toggleCamera = () => {
     if (!streamRef.current) {
       requestMedia({ audio: micOn, video: true });
@@ -111,6 +127,9 @@ const TlMeetingRoom = () => {
     await requestMedia({ audio: true, video: true });
   };
 
+  /**
+   * Toggles screen sharing using the displayMedia API.
+   */
   const toggleScreenShare = async () => {
     if (isScreenSharing) {
       await stopScreenShare();
@@ -149,6 +168,9 @@ const TlMeetingRoom = () => {
     }
   };
 
+  /**
+   * Sends a chat message to the meeting participants.
+   */
   const sendMessage = () => {
     const trimmedMessage = chatInput.trim();
     if (!trimmedMessage) {
@@ -182,6 +204,9 @@ const TlMeetingRoom = () => {
   }, []);
 
   // Start Recording
+  /**
+   * Commences localized recording of the active meeting stream.
+   */
   const startRecording = async () => {
     let stream = streamRef.current;
 
@@ -221,6 +246,9 @@ const TlMeetingRoom = () => {
   };
 
   // Stop Recording
+  /**
+   * Stops the active recording and initiates a local file download.
+   */
   const stopRecording = () => {
     if (
       mediaRecorderRef.current &&

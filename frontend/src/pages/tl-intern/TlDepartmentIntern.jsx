@@ -44,6 +44,10 @@ const initialMessages = {
   "tech-support": [],
 };
 
+/**
+ * Department communication center for Team Lead Interns.
+ * Integrates with shared announcement and tech support stores.
+ */
 const TlDepartmentChat = () => {
   const [activeChat, setActiveChat] = useState(tlInternData.channels[0]);
   const [messages, setMessages] = useState(initialMessages);
@@ -83,6 +87,10 @@ const TlDepartmentChat = () => {
         ? sharedTechSupportMessages
         : messages[activeChat.id] || [];
 
+  /**
+   * Sends a message to the current channel.
+   * Handles storage of announcements and tech support messages in the global store.
+   */
   const sendMessage = () => {
     if (!input.trim()) return;
 
@@ -126,6 +134,11 @@ const TlDepartmentChat = () => {
     setInput("");
   };
 
+  /**
+   * Logic for uploading and previewing files in chat.
+   *
+   * @param {Event} e - Input change event
+   */
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;

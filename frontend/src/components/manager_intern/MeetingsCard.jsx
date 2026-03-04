@@ -6,6 +6,12 @@ const statusStyles = {
   Ongoing: "bg-green-100 text-green-600",
 };
 
+/**
+ * Component displaying details of an upcoming or ongoing meeting within the manager intern dashboard.
+ * Supports conditional navigation based on the user's role.
+ *
+ * @param {object} meeting - The meeting data object
+ */
 const MeetingsCard = ({ meeting }) => {
   const navigate = useNavigate();
   const role = useSelector((state) => state.auth?.role);

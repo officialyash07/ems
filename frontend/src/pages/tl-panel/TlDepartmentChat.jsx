@@ -122,6 +122,10 @@ const initialMessages = {
   announcements: [],
 };
 
+/**
+ * Departmental communication hub for Team Leads.
+ * Supports channels, leadership sync groups, and integration with shared stores.
+ */
 const TlDepartmentChat = () => {
   const [activeChat, setActiveChat] = useState(tlData.channels[1]); // Assuming announcements is at index 1 now that first 3 are commented
   const [messages, setMessages] = useState(initialMessages);
@@ -156,6 +160,9 @@ const TlDepartmentChat = () => {
         ? sharedTechSupportMessages
         : messages[activeChat.id] || [];
 
+  /**
+   * Dispatches messages to active channels or leadership-specific groups.
+   */
   const sendMessage = () => {
     if (!input.trim()) return;
 
@@ -199,6 +206,11 @@ const TlDepartmentChat = () => {
     setInput("");
   };
 
+  /**
+   * Manages local file uploads within the chat environment.
+   *
+   * @param {Event} e - Change event from file input
+   */
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;

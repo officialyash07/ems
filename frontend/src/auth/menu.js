@@ -1,3 +1,9 @@
+/**
+ * Central navigation schema defining sidebar visibility per user role.
+ * Maps role keys to their authorized route identifiers.
+ *
+ * @constant {Object}
+ */
 const MENU = {
   intern: [
     "dashboard",

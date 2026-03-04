@@ -14,6 +14,10 @@ import {
   PhoneOff,
 } from "lucide-react";
 
+/**
+ * Secured virtual space for operational meetings steered by the COO.
+ * Supplies live streaming, real-time messaging, screen sharing, and recording utilities.
+ */
 const CooMeetingRoom = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -34,10 +38,17 @@ const CooMeetingRoom = () => {
   const streamRef = useRef(null);
   const videoRef = useRef(null);
 
+  /**
+   * Halts all tracked media streams forcibly stopping camera and microphone use.
+   */
   const stopCurrentStream = () => {
     streamRef.current?.getTracks().forEach((track) => track.stop());
   };
 
+  /**
+   * Automates the departure lifecycle: stopping localized capture, finalizing recordings,
+   * and subsequently routing the user back.
+   */
   const leaveMeeting = () => {
     stopCurrentStream();
     if (
@@ -49,6 +60,14 @@ const CooMeetingRoom = () => {
     navigate(-1);
   };
 
+  /**
+   * Intercedes with the browser to provision and mount user media devices.
+   *
+   * @param {object} options
+   * @param {boolean} options.audio - Dictates microphone requisition
+   * @param {boolean} options.video - Dictates camera requisition
+   * @returns {Promise<MediaStream|null>} Local media stream instance or null alongside an error flag
+   */
   const requestMedia = async ({ audio = true, video = true } = {}) => {
     if (!navigator.mediaDevices?.getUserMedia) {
       setMediaError("Media devices are not supported in this browser.");
@@ -83,6 +102,9 @@ const CooMeetingRoom = () => {
     }
   };
 
+  /**
+   * Changes the muting operational state of the local microphone track.
+   */
   const toggleMic = () => {
     if (!streamRef.current) {
       requestMedia({ audio: true, video: cameraOn });
@@ -100,6 +122,9 @@ const CooMeetingRoom = () => {
     setMicOn(nextMicOn);
   };
 
+  /**
+   * Modifies the activation toggle for the local visual track.
+   */
   const toggleCamera = () => {
     if (!streamRef.current) {
       requestMedia({ audio: micOn, video: true });
@@ -117,12 +142,19 @@ const CooMeetingRoom = () => {
     setCameraOn(nextCameraOn);
   };
 
+  /**
+   * Revokes screen sharing privileges and gracefully resumes raw camera ingestion.
+   */
   const stopScreenShare = async () => {
     setIsScreenSharing(false);
     stopCurrentStream();
     await requestMedia({ audio: true, video: true });
   };
 
+  /**
+   * Overrides the current video stream with an actively queried display surface stream.
+   * Maps 'onended' browser controls to trigger systematic fallback to the camera.
+   */
   const toggleScreenShare = async () => {
     if (isScreenSharing) {
       await stopScreenShare();
@@ -161,6 +193,9 @@ const CooMeetingRoom = () => {
     }
   };
 
+  /**
+   * Serializes the string present in the text input area into a chat array addition.
+   */
   const sendMessage = () => {
     const trimmedMessage = chatInput.trim();
     if (!trimmedMessage) {
@@ -194,6 +229,9 @@ const CooMeetingRoom = () => {
   }, []);
 
   // Start Recording
+  /**
+   * Activates MediaRecorder hooks across the aggregated user streams to capture the live session.
+   */
   const startRecording = async () => {
     let stream = streamRef.current;
 
@@ -233,6 +271,9 @@ const CooMeetingRoom = () => {
   };
 
   // Stop Recording
+  /**
+   * Ceases active MediaRecorder processing and generates a downloadable video output.
+   */
   const stopRecording = () => {
     if (
       mediaRecorderRef.current &&

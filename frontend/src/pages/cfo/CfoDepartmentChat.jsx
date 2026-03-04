@@ -90,6 +90,10 @@ const initialMessages = {
   100: [],
 };
 
+/**
+ * Dedicated departmental messaging platform for the CFO's organizational unit.
+ * Manages channels, direct messages, file attachments, and an add-member interface.
+ */
 const CfoDepartmentChat = () => {
   const [activeChat, setActiveChat] = useState(people.channels[0]);
   const [messages, setMessages] = useState(initialMessages);
@@ -104,6 +108,10 @@ const CfoDepartmentChat = () => {
 
   const currentMessages = messages[activeChat.id] || [];
 
+  /**
+   * Processes the user's input text and dispatches a simulated outgoing message
+   * to the currently selected channel or direct message thread.
+   */
   const sendMessage = () => {
     if (!input.trim()) return;
 
@@ -126,6 +134,12 @@ const CfoDepartmentChat = () => {
     setInput("");
   };
 
+  /**
+   * Captures uploaded files from the hidden input, generated temporary local URLs,
+   * and renders them as downloadable attachment messages in the chat.
+   *
+   * @param {Event} e - The file input event
+   */
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -150,6 +164,11 @@ const CfoDepartmentChat = () => {
     e.target.value = null;
   };
 
+  /**
+   * Invoked from the 'Add Members' modal to link an existing user to the group chat.
+   *
+   * @param {object} person - The user to be added
+   */
   const addToGroup = (person) => {
     if (!groupMembers.some((m) => m.id === person.id)) {
       setGroupMembers([...groupMembers, person]);

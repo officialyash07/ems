@@ -26,6 +26,10 @@ const initialMeetings = [
   },
 ];
 
+/**
+ * Management interface for the CFO's financial meetings and synchronizations.
+ * Displays upcoming events and provides a modal for scheduling new ones.
+ */
 const CfoMeetings = () => {
   const navigate = useNavigate();
   const [meetings, setMeetings] = useState(initialMeetings);
@@ -39,6 +43,12 @@ const CfoMeetings = () => {
     description: "",
   });
 
+  /**
+   * Helper utility to format raw 24-hour time strings into am/pm 12-hour strings.
+   *
+   * @param {string} time - Raw time string (e.g. "14:00")
+   * @returns {string} Formatted string (e.g. "2:00 PM")
+   */
   const formatTime = (time) => {
     const [h, m] = time.split(":");
     const hour = parseInt(h, 10);
@@ -47,6 +57,10 @@ const CfoMeetings = () => {
     return `${hour12}:${m} ${ampm}`;
   };
 
+  /**
+   * Constructs a new meeting object from local form state and prepends it
+   * to the meeting list. Enforces basic required field validation.
+   */
   const handleCreate = () => {
     if (!form.title || !form.date || !form.time) return;
 

@@ -14,6 +14,10 @@ import {
   PhoneOff,
 } from "lucide-react";
 
+/**
+ * Highly-privileged virtual meeting room interface tailored for the CFO.
+ * Features stream controls, screen sharing, chat, and session recording capabilities.
+ */
 const CfoMeetingRoom = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -34,10 +38,16 @@ const CfoMeetingRoom = () => {
   const streamRef = useRef(null);
   const videoRef = useRef(null);
 
+  /**
+   * Safely terminates all active media tracks from the user's camera and microphone.
+   */
   const stopCurrentStream = () => {
     streamRef.current?.getTracks().forEach((track) => track.stop());
   };
 
+  /**
+   * Handles the exit sequence: stopping streams, ending recordings, and routing back.
+   */
   const leaveMeeting = () => {
     stopCurrentStream();
     if (
@@ -49,6 +59,14 @@ const CfoMeetingRoom = () => {
     navigate(-1);
   };
 
+  /**
+   * Core function to negotiate device permissions and retrieve local media constraints.
+   *
+   * @param {object} options
+   * @param {boolean} options.audio - Whether to request audio access
+   * @param {boolean} options.video - Whether to request video access
+   * @returns {Promise<MediaStream|null>} The generated media stream or null on failure
+   */
   const requestMedia = async ({ audio = true, video = true } = {}) => {
     if (!navigator.mediaDevices?.getUserMedia) {
       setMediaError("Media devices are not supported in this browser.");
@@ -83,6 +101,9 @@ const CfoMeetingRoom = () => {
     }
   };
 
+  /**
+   * Inverts the state of the active audio track, asking for permissions if none exist.
+   */
   const toggleMic = () => {
     if (!streamRef.current) {
       requestMedia({ audio: true, video: cameraOn });
@@ -100,6 +121,9 @@ const CfoMeetingRoom = () => {
     setMicOn(nextMicOn);
   };
 
+  /**
+   * Inverts the state of the active video track, asking for permissions if none exist.
+   */
   const toggleCamera = () => {
     if (!streamRef.current) {
       requestMedia({ audio: micOn, video: true });
@@ -117,12 +141,19 @@ const CfoMeetingRoom = () => {
     setCameraOn(nextCameraOn);
   };
 
+  /**
+   * Ends a screen-share session and seamlessly attempts to reacquire the webcam stream.
+   */
   const stopScreenShare = async () => {
     setIsScreenSharing(false);
     stopCurrentStream();
     await requestMedia({ audio: true, video: true });
   };
 
+  /**
+   * Replaces the local video outgoing track with an ingested displayMedia stream.
+   * Binds 'onended' listeners to detect when the user stops sharing via browser UI.
+   */
   const toggleScreenShare = async () => {
     if (isScreenSharing) {
       await stopScreenShare();
@@ -161,6 +192,9 @@ const CfoMeetingRoom = () => {
     }
   };
 
+  /**
+   * Dispatches the local user's text typed into the in-room chat window.
+   */
   const sendMessage = () => {
     const trimmedMessage = chatInput.trim();
     if (!trimmedMessage) {
@@ -194,6 +228,9 @@ const CfoMeetingRoom = () => {
   }, []);
 
   // Start Recording
+  /**
+   * Initiates the MediaRecorder API over the combined local streams to save the session.
+   */
   const startRecording = async () => {
     let stream = streamRef.current;
 
@@ -233,6 +270,9 @@ const CfoMeetingRoom = () => {
   };
 
   // Stop Recording
+  /**
+   * Stops the ongoing recording and triggers an immediate blob download as `.webm`.
+   */
   const stopRecording = () => {
     if (
       mediaRecorderRef.current &&

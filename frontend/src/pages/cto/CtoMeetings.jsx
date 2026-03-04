@@ -26,6 +26,10 @@ const initialMeetings = [
   },
 ];
 
+/**
+ * Engineering meet-up and technical sync coordination interface for the CTO.
+ * Manages upcoming technical engagements and provisions a interface for scheduling new sessions.
+ */
 const CtoMeetings = () => {
   const navigate = useNavigate();
   const [meetings, setMeetings] = useState(initialMeetings);
@@ -39,6 +43,13 @@ const CtoMeetings = () => {
     description: "",
   });
 
+  /**
+   * Helper utility to normalize raw 24-hour time strings into human-readable
+   * 12-hour AM/PM representations.
+   *
+   * @param {string} time - Time string in HH:MM format
+   * @returns {string} Formatted time string
+   */
   const formatTime = (time) => {
     const [h, m] = time.split(":");
     const hour = parseInt(h, 10);
@@ -47,6 +58,10 @@ const CtoMeetings = () => {
     return `${hour12}:${m} ${ampm}`;
   };
 
+  /**
+   * Serializes modal form inputs into a new meeting object and persists it
+   * to the localized session state.
+   */
   const handleCreate = () => {
     if (!form.title || !form.date || !form.time) return;
 

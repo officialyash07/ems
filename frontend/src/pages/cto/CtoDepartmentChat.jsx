@@ -79,6 +79,10 @@ const initialMessages = {
   "tech-core-group": [],
 };
 
+/**
+ * Specialized communication interface for the CTO and senior engineering leads.
+ * Facilitates technical discussions across channels and individual direct messaging.
+ */
 const CtoDepartmentChat = () => {
   const [activeChat, setActiveChat] = useState(ctoData.channels[0]);
   const [messages, setMessages] = useState(initialMessages);
@@ -93,6 +97,10 @@ const CtoDepartmentChat = () => {
 
   const currentMessages = messages[activeChat.id] || [];
 
+  /**
+   * Constructs a message entity from user input and broadcasts it to the
+   * currently targeted chat or channel identifier.
+   */
   const sendMessage = () => {
     if (!input.trim()) return;
 
@@ -114,6 +122,12 @@ const CtoDepartmentChat = () => {
     setInput("");
   };
 
+  /**
+   * Processes local file selection, generating temporary URLs to facilitate
+   * rapid previewing and sharing within the technical stream.
+   *
+   * @param {Event} e - React change event from file input
+   */
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -137,6 +151,11 @@ const CtoDepartmentChat = () => {
     e.target.value = null; // Reset input
   };
 
+  /**
+   * Integrates a new technical lead or manager into the collective group chat roster.
+   *
+   * @param {object} person - Profile data for the engineer to be added
+   */
   const addToGroup = (person) => {
     if (!groupMembers.some((m) => m.id === person.id)) {
       setGroupMembers([...groupMembers, person]);

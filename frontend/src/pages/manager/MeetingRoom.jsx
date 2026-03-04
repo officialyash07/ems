@@ -13,6 +13,10 @@ import {
   PhoneOff,
 } from "lucide-react";
 
+/**
+ * Virtual meeting environment for managers.
+ * Provides controls for real-time audio/video streaming, screen sharing, and localized recording.
+ */
 const MeetingRoom = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -33,10 +37,16 @@ const MeetingRoom = () => {
   const streamRef = useRef(null);
   const videoRef = useRef(null);
 
+  /**
+   * Disconnects all active media tracks from the current device streams.
+   */
   const stopCurrentStream = () => {
     streamRef.current?.getTracks().forEach((track) => track.stop());
   };
 
+  /**
+   * Cleans up hardware resources and recording state before exiting the meeting.
+   */
   const leaveMeeting = () => {
     stopCurrentStream();
     if (
@@ -48,6 +58,12 @@ const MeetingRoom = () => {
     navigate(-1);
   };
 
+  /**
+   * Initializes hardware access for audio and video tracks.
+   *
+   * @param {object} constraints - Media requirement flags
+   * @returns {Promise<MediaStream|null>} The acquired stream or null on failure
+   */
   const requestMedia = async ({ audio = true, video = true } = {}) => {
     if (!navigator.mediaDevices?.getUserMedia) {
       setMediaError("Media devices are not supported in this browser.");
@@ -82,6 +98,9 @@ const MeetingRoom = () => {
     }
   };
 
+  /**
+   * Toggles the hardware microphone track state.
+   */
   const toggleMic = () => {
     if (!streamRef.current) {
       requestMedia({ audio: true, video: cameraOn });
@@ -99,6 +118,9 @@ const MeetingRoom = () => {
     setMicOn(nextMicOn);
   };
 
+  /**
+   * Toggles the hardware camera track state.
+   */
   const toggleCamera = () => {
     if (!streamRef.current) {
       requestMedia({ audio: micOn, video: true });
@@ -116,12 +138,18 @@ const MeetingRoom = () => {
     setCameraOn(nextCameraOn);
   };
 
+  /**
+   * Reverts stream source from display capture back to camera hardware.
+   */
   const stopScreenShare = async () => {
     setIsScreenSharing(false);
     stopCurrentStream();
     await requestMedia({ audio: true, video: true });
   };
 
+  /**
+   * Prompts user for screen/window selection via displayMedia API.
+   */
   const toggleScreenShare = async () => {
     if (isScreenSharing) {
       await stopScreenShare();
@@ -160,6 +188,9 @@ const MeetingRoom = () => {
     }
   };
 
+  /**
+   * Broadcasts a new message to all meeting participants.
+   */
   const sendMessage = () => {
     const trimmedMessage = chatInput.trim();
     if (!trimmedMessage) {
@@ -193,6 +224,9 @@ const MeetingRoom = () => {
   }, []);
 
   // Start Recording
+  /**
+   * Commences localized recording of the active MediaStream.
+   */
   const startRecording = async () => {
     let stream = streamRef.current;
 
@@ -232,6 +266,9 @@ const MeetingRoom = () => {
   };
 
   // Stop Recording
+  /**
+   * Finalizes the MediaRecorder session and prompts for local file download.
+   */
   const stopRecording = () => {
     if (
       mediaRecorderRef.current &&

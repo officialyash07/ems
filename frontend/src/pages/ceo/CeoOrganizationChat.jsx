@@ -164,6 +164,10 @@ const initialMessages = {
   100: [],
 };
 
+/**
+ * Comprehensive messaging platform for the CEO to communicate across the company.
+ * Supports direct messages, departmental channels, group chats, and file sharing.
+ */
 const CeoOrganizationChat = () => {
   const [activeUser, setActiveUser] = useState(
     organizationDepartments[0].channels[0],
@@ -180,6 +184,10 @@ const CeoOrganizationChat = () => {
 
   const currentMessages = messages[activeUser.id] || [];
 
+  /**
+   * Handles dispatching a new text message to the currently active channel or user.
+   * Appends the message locally to the simulated state.
+   */
   const sendMessage = () => {
     if (!input.trim()) return;
 
@@ -203,6 +211,12 @@ const CeoOrganizationChat = () => {
     setInput("");
   };
 
+  /**
+   * Catches file selections from the hidden file input, generates a local object URL,
+   * and dispatches a simulated file message to the chat.
+   *
+   * @param {Event} e - The file input change event
+   */
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -228,6 +242,12 @@ const CeoOrganizationChat = () => {
     e.target.value = null;
   };
 
+  /**
+   * Adds a selected person to the active group chat configuration.
+   * Refrains from adding duplicates.
+   *
+   * @param {object} person - The user entity to add to the group
+   */
   const addToGroup = (person) => {
     if (!groupMembers.some((m) => m.id === person.id)) {
       setGroupMembers([...groupMembers, person]);
