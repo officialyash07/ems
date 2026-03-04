@@ -24,7 +24,7 @@ const MENU = {
     "chat",
     "review-submissions",
   ],
-  admin: ["dashboard", "users", "chat", "settings"],
+  admin: ["dashboard", "users", "settings"],
   // COO Panel Added Below
   coo: [
     "dashboard",
