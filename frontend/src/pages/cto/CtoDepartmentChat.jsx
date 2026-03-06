@@ -43,8 +43,8 @@ const ctoData = {
     },
     {
       id: "tech-stack",
-      name: "Tech Stack",
-      description: "Discussions on tech stack",
+      name: "Tech Support",
+      description: "Discussions on tech support",
       type: "channel",
     },
     {
