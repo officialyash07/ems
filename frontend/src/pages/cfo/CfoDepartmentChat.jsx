@@ -9,6 +9,14 @@ import {
   MoreVertical,
   File,
 } from "lucide-react";
+import {
+  addSharedTechSupportMessage,
+  getSharedTechSupportMessages,
+} from "../../utils/techSupportStore";
+import {
+  addSharedAnnouncement,
+  getSharedAnnouncements,
+} from "../../utils/announcementsStore";
 
 const people = {
   members: [
@@ -49,9 +57,9 @@ const people = {
       type: "channel",
     },
     {
-      id: "tech-stack",
-      name: "Tech Stack",
-      description: "Discussions on tech stack",
+      id: "tech-support",
+      name: "Tech Support",
+      description: "Discussions on tech support",
       type: "channel",
     },
     {
@@ -85,7 +93,7 @@ const initialMessages = {
       type: "text",
     },
   ],
-  "tech-stack": [],
+  "tech-support": [],
   "team-updates": [],
   100: [],
 };
@@ -103,7 +111,27 @@ const CfoDepartmentChat = () => {
   const fileInputRef = useRef(null);
 
   useEffect(() => {
-    // Add any necessary global event listeners here
+    const syncMessages = () => {
+      const sharedTech = getSharedTechSupportMessages();
+      const sharedAnnouncements = getSharedAnnouncements();
+
+      setMessages((prev) => ({
+        ...prev,
+        "tech-support": [
+          ...(initialMessages["tech-support"] || []),
+          ...sharedTech,
+        ],
+        announcements: [
+          ...(initialMessages.announcements || []),
+          ...sharedAnnouncements,
+        ],
+      }));
+    };
+
+    syncMessages();
+    window.addEventListener("ems:notifications:updated", syncMessages);
+    return () =>
+      window.removeEventListener("ems:notifications:updated", syncMessages);
   }, []);
 
   const currentMessages = messages[activeChat.id] || [];
@@ -114,6 +142,26 @@ const CfoDepartmentChat = () => {
    */
   const sendMessage = () => {
     if (!input.trim()) return;
+
+    if (activeChat.id === "tech-support") {
+      addSharedTechSupportMessage({
+        from: "CFO",
+        text: input,
+        sourceRole: "cfo",
+      });
+      setInput("");
+      return;
+    }
+
+    if (activeChat.id === "announcements") {
+      addSharedAnnouncement({
+        from: "CFO",
+        text: input,
+        sourceRole: "cfo",
+      });
+      setInput("");
+      return;
+    }
 
     const newMessage = {
       from: "You",
