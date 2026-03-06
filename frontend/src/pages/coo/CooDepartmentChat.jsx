@@ -9,6 +9,14 @@ import {
   MoreVertical,
   File,
 } from "lucide-react";
+import {
+  addSharedTechSupportMessage,
+  getSharedTechSupportMessages,
+} from "../../utils/techSupportStore";
+import {
+  addSharedAnnouncement,
+  getSharedAnnouncements,
+} from "../../utils/announcementsStore";
 
 /* OPERATIONS DATA */
 const opsData = {
@@ -92,7 +100,27 @@ const CooDepartmentChat = () => {
   const fileInputRef = useRef(null);
 
   useEffect(() => {
-    // Add any necessary global event listeners here
+    const syncMessages = () => {
+      const sharedTech = getSharedTechSupportMessages();
+      const sharedAnnouncements = getSharedAnnouncements();
+
+      setMessages((prev) => ({
+        ...prev,
+        "Tech Support": [
+          ...(initialMessages["Tech Support"] || []),
+          ...sharedTech,
+        ],
+        announcements: [
+          ...(initialMessages.announcements || []),
+          ...sharedAnnouncements,
+        ],
+      }));
+    };
+
+    syncMessages();
+    window.addEventListener("ems:notifications:updated", syncMessages);
+    return () =>
+      window.removeEventListener("ems:notifications:updated", syncMessages);
   }, []);
 
   const currentMessages = messages[activeChat.id] || [];
@@ -103,6 +131,26 @@ const CooDepartmentChat = () => {
    */
   const sendMessage = () => {
     if (!input.trim()) return;
+
+    if (activeChat.id === "Tech Support") {
+      addSharedTechSupportMessage({
+        from: "COO",
+        text: input,
+        sourceRole: "coo",
+      });
+      setInput("");
+      return;
+    }
+
+    if (activeChat.id === "announcements") {
+      addSharedAnnouncement({
+        from: "COO",
+        text: input,
+        sourceRole: "coo",
+      });
+      setInput("");
+      return;
+    }
 
     const newMessage = {
       from: "You",
