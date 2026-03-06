@@ -14,6 +14,14 @@ import {
   MoreVertical,
   File,
 } from "lucide-react";
+import {
+  addSharedTechSupportMessage,
+  getSharedTechSupportMessages,
+} from "../../utils/techSupportStore";
+import {
+  addSharedAnnouncement,
+  getSharedAnnouncements,
+} from "../../utils/announcementsStore";
 
 const people = {
   managers: [
@@ -79,10 +87,10 @@ const organizationDepartments = [
         description: "Important updates only",
       },
       {
-        id: "tech-stack",
-        name: "Tech Stack",
+        id: "tech-support",
+        name: "Tech Support",
         type: "channel",
-        description: "Discussions on tech stack",
+        description: "Discussions on tech support",
       },
       {
         id: "tech-team-updates",
@@ -103,10 +111,10 @@ const organizationDepartments = [
         description: "Important updates only",
       },
       {
-        id: "fin-stack",
-        name: "Tech Stack",
+        id: "fin-support",
+        name: "Tech Support",
         type: "channel",
-        description: "Discussions on tech stack",
+        description: "Discussions on tech support",
       },
       {
         id: "fin-team-updates",
@@ -127,10 +135,10 @@ const organizationDepartments = [
         description: "Important updates only",
       },
       {
-        id: "ops-stack",
-        name: "Tech Stack",
+        id: "ops-support",
+        name: "Tech Support",
         type: "channel",
-        description: "Discussions on tech stack",
+        description: "Discussions on tech support",
       },
       {
         id: "ops-team-updates",
@@ -179,7 +187,29 @@ const CeoOrganizationChat = () => {
   const fileInputRef = useRef(null);
 
   useEffect(() => {
-    // Add any necessary global event listeners here
+    const syncMessages = () => {
+      const sharedTech = getSharedTechSupportMessages();
+      const sharedAnnouncements = getSharedAnnouncements();
+
+      setMessages((prev) => ({
+        ...prev,
+        "tech-support": sharedTech,
+        "tech-announcements": [
+          ...(initialMessages["tech-announcements"] || []),
+          ...sharedAnnouncements,
+        ],
+        // Also map to other departments if needed, but the store is usually shared
+        "fin-support": sharedTech,
+        "fin-announcements": sharedAnnouncements,
+        "ops-support": sharedTech,
+        "ops-announcements": sharedAnnouncements,
+      }));
+    };
+
+    syncMessages();
+    window.addEventListener("ems:notifications:updated", syncMessages);
+    return () =>
+      window.removeEventListener("ems:notifications:updated", syncMessages);
   }, []);
 
   const currentMessages = messages[activeUser.id] || [];
@@ -190,6 +220,26 @@ const CeoOrganizationChat = () => {
    */
   const sendMessage = () => {
     if (!input.trim()) return;
+
+    if (activeUser.id.endsWith("-support")) {
+      addSharedTechSupportMessage({
+        from: "CEO",
+        text: input,
+        sourceRole: "ceo",
+      });
+      setInput("");
+      return;
+    }
+
+    if (activeUser.id.endsWith("-announcements")) {
+      addSharedAnnouncement({
+        from: "CEO",
+        text: input,
+        sourceRole: "ceo",
+      });
+      setInput("");
+      return;
+    }
 
     setMessages((prev) => ({
       ...prev,
