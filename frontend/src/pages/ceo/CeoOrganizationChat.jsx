@@ -80,9 +80,9 @@ const organizationDepartments = [
       },
       {
         id: "tech-stack",
-        name: "Tech Stack",
+        name: "Tech Support",
         type: "channel",
-        description: "Discussions on tech stack",
+        description: "Discussions on tech support",
       },
       {
         id: "tech-team-updates",
@@ -104,9 +104,9 @@ const organizationDepartments = [
       },
       {
         id: "fin-stack",
-        name: "Tech Stack",
+        name: "Tech Support",
         type: "channel",
-        description: "Discussions on tech stack",
+        description: "Discussions on tech support",
       },
       {
         id: "fin-team-updates",
@@ -128,9 +128,9 @@ const organizationDepartments = [
       },
       {
         id: "ops-stack",
-        name: "Tech Stack",
+        name: "Tech Support",
         type: "channel",
-        description: "Discussions on tech stack",
+        description: "Discussions on tech support",
       },
       {
         id: "ops-team-updates",
