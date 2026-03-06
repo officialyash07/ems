@@ -1,5 +1,10 @@
 const ANNOUNCEMENTS_STORAGE_KEY = "ems_shared_announcements";
 
+const emitNotificationsUpdated = () => {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new Event("ems:notifications:updated"));
+};
+
 const parseAnnouncements = (value) => {
   try {
     const parsed = JSON.parse(value || "[]");
@@ -16,6 +21,7 @@ export const getSharedAnnouncements = () => {
 
 export const saveSharedAnnouncements = (announcements) => {
   localStorage.setItem(ANNOUNCEMENTS_STORAGE_KEY, JSON.stringify(announcements));
+  emitNotificationsUpdated();
 };
 
 export const addSharedAnnouncement = (message) => {

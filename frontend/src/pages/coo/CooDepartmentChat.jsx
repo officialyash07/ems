@@ -43,9 +43,9 @@ const opsData = {
       type: "channel",
     },
     {
-      id: "tech-stack",
-      name: "Tech Stack",
-      description: "Discussions on tech stack",
+      id: "Tech Support",
+      name: "Tech Support",
+      description: "Discussions on Tech Support",
       type: "channel",
     },
     {
@@ -74,7 +74,7 @@ const initialMessages = {
       type: "text",
     },
   ],
-  "tech-stack": [],
+  "Tech Support": [],
   "team-updates": [],
   "ops-team-group": [],
 };

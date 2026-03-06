@@ -1,5 +1,10 @@
 const TECH_SUPPORT_STORAGE_KEY = "ems_shared_tech_support_messages";
 
+const emitNotificationsUpdated = () => {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new Event("ems:notifications:updated"));
+};
+
 const parseMessages = (value) => {
   try {
     const parsed = JSON.parse(value || "[]");
@@ -16,6 +21,7 @@ export const getSharedTechSupportMessages = () => {
 
 export const saveSharedTechSupportMessages = (messages) => {
   localStorage.setItem(TECH_SUPPORT_STORAGE_KEY, JSON.stringify(messages));
+  emitNotificationsUpdated();
 };
 
 export const addSharedTechSupportMessage = (message) => {

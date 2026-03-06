@@ -1,5 +1,10 @@
 const MEETINGS_STORAGE_KEY = "ems_shared_meetings";
 
+const emitNotificationsUpdated = () => {
+    if (typeof window === "undefined") return;
+    window.dispatchEvent(new Event("ems:notifications:updated"));
+};
+
 const safeParseMeetings = (value) => {
     try {
         const parsed = JSON.parse(value || "[]");
@@ -61,6 +66,7 @@ export const getAllStoredMeetings = () => {
 
 export const saveStoredMeetings = (meetings) => {
     localStorage.setItem(MEETINGS_STORAGE_KEY, JSON.stringify(meetings));
+    emitNotificationsUpdated();
 };
 
 export const addMeetingToStore = (meeting, creatorRole) => {
