@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 
 import { Plus } from "lucide-react";
 
@@ -13,12 +14,12 @@ import { submissionsApi, tasksApi } from "../../utils/api";
  * Enables interns to upload files or links for review against assigned tasks.
  */
 const InternSubmissions = () => {
+  const { id: internId } = useSelector((state) => state.auth);
   const [open, setOpen] = useState(false);
   const [submissions, setSubmissions] = useState([]);
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const internId = "intern-1"; // TODO: Get from auth context
 
   // Fetch submissions and tasks on mount
   useEffect(() => {
@@ -31,27 +32,18 @@ const InternSubmissions = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      console.log("[fetchData] Starting to fetch data...");
 
       // Fetch tasks assigned to this intern
-      console.log("[fetchData] Fetching all tasks...");
       const allTasks = await tasksApi.getAll();
-      console.log("[fetchData] All tasks response:", allTasks);
 
       if (!Array.isArray(allTasks)) {
         throw new Error(
           `Invalid tasks response: expected an array but got ${typeof allTasks}`,
         );
       }
-      console.log("[fetchData] Total tasks:", allTasks.length);
 
       const internTasks = allTasks.filter(
         (task) => task.assignedToId === internId,
-      );
-      console.log(
-        "[fetchData] Intern tasks for internId:",
-        internId,
-        internTasks,
       );
 
       setTasks(internTasks);

@@ -22,31 +22,31 @@ import {
 } from "lucide-react";
 import { tasksApi, submissionsApi } from "../../utils/api";
 
-const metrics = [
+const METRIC_CARDS = [
   {
     title: "Revenue Growth",
-    value: "+32%",
+    dataKey: "revenueGrowth",
     icon: TrendingUp,
     iconBg: "bg-green-100",
     iconColor: "text-green-600",
   },
   {
     title: "Cost Efficiency",
-    value: "+15%",
+    dataKey: "costEfficiency",
     icon: TrendingDown,
     iconBg: "bg-green-100",
     iconColor: "text-green-600",
   },
   {
     title: "Market Position",
-    value: "#3",
+    dataKey: "marketPosition",
     icon: BarChart3,
     iconBg: "bg-green-100",
     iconColor: "text-green-600",
   },
   {
     title: "Customer Satisfaction",
-    value: "94%",
+    dataKey: "customerSatisfaction",
     icon: PieChartIcon,
     iconBg: "bg-green-100",
     iconColor: "text-green-600",
@@ -81,7 +81,7 @@ const COLORS = ["#4f46e5", "#e5e7eb"];
  * Includes data visualizations for revenue, tasks, meetings, and department productivity.
  */
 const CeoAnalytics = () => {
-  const [metrics, setMetrics] = useState({
+  const [analyticsData, setAnalyticsData] = useState({
     revenueGrowth: "+32%",
     costEfficiency: "+15%",
     marketPosition: "#3",
@@ -134,7 +134,7 @@ const CeoAnalytics = () => {
         { name: "Operations", value: Math.min(80, completionRate - 10) },
       ];
 
-      setMetrics({
+      setAnalyticsData({
         revenueGrowth: `+${Math.floor(Math.random() * 20 + 20)}%`,
         costEfficiency: `+${Math.floor(Math.random() * 15 + 10)}%`,
         marketPosition: "#3",
@@ -180,8 +180,9 @@ const CeoAnalytics = () => {
 
       {/* TOP CARDS */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        {metrics.map((item, index) => {
+        {METRIC_CARDS.map((item, index) => {
           const Icon = item.icon;
+          const value = analyticsData[item.dataKey];
 
           return (
             <div
@@ -192,7 +193,7 @@ const CeoAnalytics = () => {
                 <div>
                   <p className="text-sm text-slate-500">{item.title}</p>
                   <p className="mt-2 text-3xl font-bold text-slate-900">
-                    {item.value}
+                    {value}
                   </p>
                 </div>
 
@@ -215,7 +216,7 @@ const CeoAnalytics = () => {
         </div>
 
         <ResponsiveContainer width="100%" height={250}>
-          <LineChart data={taskCompletionData}>
+          <LineChart data={analyticsData.taskCompletionData}>
             <XAxis dataKey="month" />
             <YAxis />
             <Tooltip />
@@ -240,12 +241,12 @@ const CeoAnalytics = () => {
             <ResponsiveContainer width={250} height={250}>
               <PieChart>
                 <Pie
-                  data={meetingData}
+                  data={analyticsData.meetingData}
                   innerRadius={70}
                   outerRadius={100}
                   dataKey="value"
                 >
-                  {meetingData.map((_, i) => (
+                  {analyticsData.meetingData.map((_, i) => (
                     <Cell key={i} fill={COLORS[i]} />
                   ))}
                 </Pie>
@@ -264,7 +265,7 @@ const CeoAnalytics = () => {
           <h3 className="font-semibold mb-4">Department Productivity</h3>
 
           <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={departmentData} layout="vertical">
+            <BarChart data={analyticsData.departmentData} layout="vertical">
               <XAxis type="number" />
               <YAxis dataKey="name" type="category" />
               <Tooltip />
