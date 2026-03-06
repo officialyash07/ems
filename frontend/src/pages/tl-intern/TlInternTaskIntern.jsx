@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import { Plus } from "lucide-react";
 
 import AssignTaskModal from "../../components/tl-panel/AssignTaskModal";
@@ -38,6 +39,7 @@ const interns = [
  * Task management interface for TL Interns to assign and track intern tasks.
  */
 const TlInternTask = () => {
+  const { id: currentUserId } = useSelector((state) => state.auth);
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -99,7 +101,7 @@ const TlInternTask = () => {
         description: newTask.task, // Using task as description for now
         departmentId: "dept-engineering", // Engineering department from seed
         assignedToId: newTask.intern.id, // Uses real user IDs from seeded data
-        assignedById: "admin-1", // Admin user from seed
+        assignedById: currentUserId || "unknown", // Use dynamic ID from session
         priority: newTask.priority.toLowerCase(),
         dueDate: new Date(newTask.deadline).toISOString(),
         status: newTask.status || "pending",

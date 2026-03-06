@@ -1,9 +1,9 @@
 // API base URL configuration
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL = "/api";
 
 const getStoredToken = () => {
   try {
-    const auth = JSON.parse(localStorage.getItem('auth') || '{}');
+    const auth = JSON.parse(localStorage.getItem("auth") || "{}");
     return auth?.token || null;
   } catch (error) {
     return null;
@@ -12,8 +12,8 @@ const getStoredToken = () => {
 
 // Generic fetch wrapper
 export const apiFetch = async (endpoint, options = {}) => {
-  const { method = 'GET', body, isFormData = false, ...rest } = options;
-  
+  const { method = "GET", body, isFormData = false, ...rest } = options;
+
   const config = {
     method,
     ...rest,
@@ -22,7 +22,7 @@ export const apiFetch = async (endpoint, options = {}) => {
   // Only set Content-Type for non-FormData requests
   if (!isFormData) {
     config.headers = {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       ...rest.headers,
     };
   } else {
@@ -49,7 +49,7 @@ export const apiFetch = async (endpoint, options = {}) => {
 
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
-    
+
     if (!response.ok) {
       let parsedError = null;
 
@@ -61,10 +61,11 @@ export const apiFetch = async (endpoint, options = {}) => {
 
       console.error(`[apiFetch] API Error Response:`, parsedError);
       throw new Error(
-        parsedError?.error || `API error: ${response.status} ${response.statusText}`
+        parsedError?.error ||
+          `API error: ${response.status} ${response.statusText}`,
       );
     }
-    
+
     const data = await response.json();
     return data || [];
   } catch (error) {
@@ -76,65 +77,65 @@ export const apiFetch = async (endpoint, options = {}) => {
 // Task API calls
 export const tasksApi = {
   // Create a new task
-  create: (taskData) => 
-    apiFetch('/tasks', {
-      method: 'POST',
+  create: (taskData) =>
+    apiFetch("/tasks", {
+      method: "POST",
       body: taskData,
     }),
 
   // Get all tasks
   getAll: () =>
-    apiFetch('/tasks', {
-      method: 'GET',
+    apiFetch("/tasks", {
+      method: "GET",
     }),
 
   // Get task by ID
   getById: (id) =>
     apiFetch(`/tasks/${id}`, {
-      method: 'GET',
+      method: "GET",
     }),
 
   // Update task
   update: (id, taskData) =>
     apiFetch(`/tasks/${id}`, {
-      method: 'PATCH',
+      method: "PATCH",
       body: taskData,
     }),
 
   // Delete task
   delete: (id) =>
     apiFetch(`/tasks/${id}`, {
-      method: 'DELETE',
+      method: "DELETE",
     }),
 
   // Assign task to user (Team Lead only)
   assign: (id, assignedToId, role) =>
     apiFetch(`/tasks/${id}/assign`, {
-      method: 'PATCH',
+      method: "PATCH",
       body: { assignedToId, role },
     }),
 
   // Get task versions
   getVersions: (id) =>
     apiFetch(`/tasks/${id}/versions`, {
-      method: 'GET',
+      method: "GET",
     }),
 };
 
 export const authApi = {
   register: (userData) =>
-    apiFetch('/auth/register', {
-      method: 'POST',
+    apiFetch("/auth/register", {
+      method: "POST",
       body: userData,
     }),
   login: (credentials) =>
-    apiFetch('/auth/login', {
-      method: 'POST',
+    apiFetch("/auth/login", {
+      method: "POST",
       body: credentials,
     }),
   me: () =>
-    apiFetch('/auth/me', {
-      method: 'GET',
+    apiFetch("/auth/me", {
+      method: "GET",
     }),
 };
 
@@ -142,8 +143,8 @@ export const authApi = {
 export const submissionsApi = {
   // Create a new submission (with file upload)
   create: (formData) =>
-    apiFetch('/submissions', {
-      method: 'POST',
+    apiFetch("/submissions", {
+      method: "POST",
       body: formData,
       isFormData: true,
     }),
@@ -151,32 +152,32 @@ export const submissionsApi = {
   // Get all submissions for a task
   getByTask: (taskId) =>
     apiFetch(`/submissions/task/${taskId}`, {
-      method: 'GET',
+      method: "GET",
     }),
 
   // Get submission by ID
   getById: (id) =>
     apiFetch(`/submissions/${id}`, {
-      method: 'GET',
+      method: "GET",
     }),
 
   // Get submission history (all submissions from a user for a task)
   getHistory: (taskId, userId) =>
     apiFetch(`/submissions/task/${taskId}/user/${userId}`, {
-      method: 'GET',
+      method: "GET",
     }),
 
   // Review submission (approve/reject)
   review: (id, reviewData) =>
     apiFetch(`/submissions/${id}/review`, {
-      method: 'PATCH',
+      method: "PATCH",
       body: reviewData,
     }),
 
   // Delete submission
   delete: (id) =>
     apiFetch(`/submissions/${id}`, {
-      method: 'DELETE',
+      method: "DELETE",
     }),
 };
 

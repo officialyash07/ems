@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import { Github, FileText, CheckCircle, XCircle } from "lucide-react";
 
 import SubmissionStatusBadge from "../../components/tl-panel/SubmissionStatusBadge";
@@ -12,6 +13,7 @@ import { Link } from "react-router-dom";
  * Aggregates all intern submissions across tasks and facilitates the review/approval workflow.
  */
 const TlSubmissionsReview = () => {
+  const { id: currentUserId } = useSelector((state) => state.auth);
   const [submissions, setSubmissions] = useState([]);
   const [active, setActive] = useState(null);
   const [feedback, setFeedback] = useState("");
@@ -87,11 +89,6 @@ const TlSubmissionsReview = () => {
     if (!active) return;
 
     try {
-      console.log("[updateStatus] Starting status update:", {
-        submissionId: active.id,
-        newStatus: statusBadge,
-      });
-
       const statusMap = {
         "Pending Review": "pending",
         "Changes Requested": "rejected",
@@ -99,16 +96,12 @@ const TlSubmissionsReview = () => {
       };
 
       const reviewData = {
-        reviewerId: "admin-1", // Use existing admin user since tl-1 doesn't exist in database
+        reviewerId: currentUserId || "unknown",
         status: statusMap[status],
         reviewComment: feedback,
       };
 
-      console.log("[updateStatus] Sending review data:", reviewData);
-
       await submissionsApi.review(active.id, reviewData);
-
-      console.log("[updateStatus] Review submitted successfully");
 
       // Update local state
       setSubmissions((prev) =>
@@ -195,7 +188,7 @@ const TlSubmissionsReview = () => {
                 Uploaded File
               </div>
               <a
-                href={`http://localhost:5000${active.fileUrl}`}
+                href={`${active.fileUrl}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-block rounded border border-gray-400 px-4 py-2 text-sm hover:bg-slate-100"

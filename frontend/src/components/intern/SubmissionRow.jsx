@@ -14,15 +14,9 @@ const SubmissionRow = ({ item }) => {
    */
   const handleView = () => {
     if (item.type === "file" && item.fileUrl) {
-      // Get the API base URL and construct the full file URL
-      const apiBaseUrl =
-        import.meta.env.VITE_API_URL || "http://localhost:5000/api";
-      const baseUrl = apiBaseUrl.replace("/api", "");
-      const fileUrl = `${baseUrl}${item.fileUrl}`;
-      console.log("[SubmissionRow] Opening file:", fileUrl);
-      window.open(fileUrl, "_blank");
+      // Use relative path which is proxied by Vite
+      window.open(item.fileUrl, "_blank");
     } else if (item.type === "link" && item.externalLink) {
-      console.log("[SubmissionRow] Opening external link:", item.externalLink);
       window.open(item.externalLink, "_blank");
     }
   };
