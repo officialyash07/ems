@@ -13,27 +13,11 @@ import { Eye, EyeOff, ArrowRight } from "lucide-react";
  */
 const Login = () => {
   const quickLoginUsers = [
-    { role: "intern", email: "intern@owms.com", name: "Intern User" },
-    { role: "team_lead", email: "teamlead@owms.com", name: "Team Lead User" },
-    {
-      role: "team_lead_intern",
-      email: "tlintern@owms.com",
-      name: "Team Lead Intern User",
-    },
-    { role: "manager", email: "manager@owms.com", name: "Manager User" },
-    {
-      role: "manager_intern",
-      email: "manager_intern@owms.com",
-      name: "Manager Intern User",
-    },
-    { role: "cto", email: "cto@owms.com", name: "CTO User" },
-    { role: "cfo", email: "cfo@owms.com", name: "CFO User" },
-    { role: "coo", email: "coo@owms.com", name: "COO User" },
-    { role: "ceo", email: "ceo@owms.com", name: "CEO User" },
+    { role: "admin", email: "admin@owms.com", name: "Admin User" },
   ];
 
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("intern@owms.com");
+  const [email, setEmail] = useState("admin@owms.com");
   const [password, setPassword] = useState("password123");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -90,23 +74,12 @@ const Login = () => {
           password: "password123",
         });
       } catch {
-        const registerResponse = await authApi.register({
+        await authApi.register({
           email: quickUser.email,
           password: "password123",
-          confirmPassword: "password123",
           role: quickUser.role,
           name: quickUser.name,
         });
-
-        if (registerResponse?.requiresEmailVerification) {
-          if (!registerResponse.verificationToken) {
-            throw new Error(
-              "Email verification is required. Ask an admin for your verification link.",
-            );
-          }
-
-          await authApi.verifyEmail({ token: registerResponse.verificationToken });
-        }
 
         response = await authApi.login({
           email: quickUser.email,
@@ -121,26 +94,6 @@ const Login = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  /**
-   * Provides formatted display labels for specific technical role keys.
-   *
-   * @param {string} role - Internal role identifier
-   * @returns {string} Human-readable label
-   */
-  const formatRoleLabel = (role) => {
-    if (role === "team_lead") return "Team Lead";
-    if (role === "team_lead_intern") return "TL Intern";
-    return role;
-  };
-
-  const isMeetingsEnabledForRole = (role) => {
-    return true;
-  };
-
-  const isChatEnabledForRole = (role) => {
-    return true;
   };
 
   return (
@@ -203,16 +156,16 @@ const Login = () => {
           </button>
         </form>
 
-        <div className="grid grid-cols-2 gap-3 mt-4">
+        <div className="mt-4">
           {quickLoginUsers.map((u) => (
             <button
               key={u.email}
               type="button"
               disabled={loading}
               onClick={() => handleQuickLogin(u.email)}
-              className="rounded-lg border border-slate-300 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 transition disabled:cursor-not-allowed disabled:opacity-60"
+              className="w-full rounded-lg border border-slate-300 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 transition disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Login as {formatRoleLabel(u.role)}
+              Login as Admin
             </button>
           ))}
         </div>

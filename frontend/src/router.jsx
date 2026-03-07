@@ -47,11 +47,7 @@ import Manager_internDepartmentChat from "./pages/manager_intern/Manager_internD
 import Manager_internReports from "./pages/manager_intern/Manager_internReports";
 import Manager_internSubmissionsReview from "./pages/manager_intern/Manager_internSubmissionsReview";
 
-/* Admin Pages */
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import AdminUserManagement from "./pages/admin/AdminUserManagement";
-import AdminSettings from "./pages/admin/AdminSettings";
-// import AdminChat from "./pages/admin/AdminChat";
+
 
 /* CTO Pages */
 import CtoDashboard from "./pages/cto/CtoDashboard";
@@ -202,22 +198,7 @@ export const router = createBrowserRouter([
     ],
   },
 
-  /* ================= ADMIN ================= */
-  {
-    path: "/admin",
-    element: (
-      <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
-        <DashboardLayout />
-      </ProtectedRoute>
-    ),
-    children: [
-      { index: true, element: <Navigate to="dashboard" /> },
-      { path: "dashboard", element: <AdminDashboard /> },
-      { path: "users", element: <AdminUserManagement /> },
-      // { path: "chat", element: <AdminChat /> }, // ADDED
-      { path: "settings", element: <AdminSettings /> },
-    ],
-  },
+
 
   /* ================= CTO ================= */
   {
