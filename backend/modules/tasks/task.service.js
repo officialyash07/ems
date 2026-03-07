@@ -43,10 +43,9 @@ exports.getTasks = async () => {
 // GET TASK BY ID
 exports.getTaskById = async (id) => {
   const task = await Task.findById(id)
-    .populate('versions')
-    .populate('assignedTo')
-    .populate('assignedBy')
-    .populate('department')
+    .populate('assignedToId')
+    .populate('assignedById')
+    .populate('departmentId')
     .lean();
 
   if (!task) {
@@ -114,7 +113,7 @@ exports.getTaskVersions = async (taskId) => {
   }
 
   return TaskVersion.find({ taskId })
-    .populate('changedBy')
+    .populate('changedById')
     .sort({ createdAt: -1 })
     .lean();
 };
@@ -133,7 +132,7 @@ exports.deleteTask = async (id) => {
 // ASSIGN TASK (Only Team Lead can assign)
 exports.assignTask = async (taskId, assignedToId, assignedById, userRole) => {
   // Only Team Lead (TL) can assign tasks
-  if (userRole !== 'Team Lead' && userRole !== 'tl' && userRole !== 'admin') {
+  if (userRole !== 'team_lead' && userRole !== 'tl' && userRole !== 'admin') {
     throw new Error('Only Team Lead can assign tasks');
   }
 
@@ -161,7 +160,7 @@ exports.assignTask = async (taskId, assignedToId, assignedById, userRole) => {
     },
     { new: true }
   )
-    .populate('assignedTo')
-    .populate('assignedBy');
+    .populate('assignedToId')
+    .populate('assignedById');
 };
 
