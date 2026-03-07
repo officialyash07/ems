@@ -1,8 +1,9 @@
-const { extractBearerToken, verifyAccessToken } = require('../utils/jwt');
+const { extractBearerToken, extractCookieToken, verifyAccessToken } = require('../utils/jwt');
 
 const authenticate = (req, res, next) => {
 	try {
-		const token = extractBearerToken(req.headers.authorization);
+		const token =
+			extractCookieToken(req.headers.cookie) || extractBearerToken(req.headers.authorization);
 
 		if (!token) {
 			return res.status(401).json({ error: 'Authentication required' });

@@ -3,6 +3,7 @@ import { NavLink } from "react-router-dom";
 
 import { MENU } from "../auth/menu";
 import { logout } from "../redux/authSlice";
+import { authApi } from "../utils/api";
 
 /**
  * Sidebar component that adapts the navigational menu based on the user's role.
@@ -10,6 +11,17 @@ import { logout } from "../redux/authSlice";
  */
 const Sidebar = () => {
   const dispatch = useDispatch();
+
+  const handleLogout = async () => {
+    try {
+      await authApi.logout();
+    } catch (error) {
+      // Clear client auth state even if the server cookie is already invalid.
+      console.error("Failed to clear auth cookie:", error);
+    } finally {
+      dispatch(logout());
+    }
+  };
 
   // Pull relevant user information from global Redux auth state
   const { role, name, position, department_name } = useSelector(
@@ -62,7 +74,7 @@ const Sidebar = () => {
 
       {/* ---------------- LOGOUT BUTTON ---------------- */}
       <button
-        onClick={() => dispatch(logout())}
+        onClick={handleLogout}
         className="text-red-500 font-semibold py-4 w-full bg-transparent hover:bg-red-900/20 transition-colors duration-150 border-t border-[#2d3748] mt-auto cursor-pointer"
       >
         Log Out
