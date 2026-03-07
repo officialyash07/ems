@@ -15,22 +15,6 @@ const WATCHED_STORAGE_KEYS = [
   "ems_notification_reads_v1",
 ];
 
-const getMeetingsRoute = (role) => {
-  if (!role) return null;
-  if (role === "manager_intern") return "/manager_intern/intern-meetings";
-  return `/${role}/meetings`;
-};
-
-const getChatRoute = (role) => {
-  if (!role) return null;
-  return `/${role}/chat`;
-};
-
-const getRouteForNotification = (role, type) => {
-  if (type === "meeting") return getMeetingsRoute(role);
-  return getChatRoute(role);
-};
-
 const formatTimestamp = (timestamp) => {
   if (!timestamp) return "";
   return new Date(timestamp).toLocaleString();
@@ -45,6 +29,7 @@ const Topbar = () => {
   const [notifications, setNotifications] = useState([]);
 
   const loadNotifications = () => {
+    // In admin-frontend, admins see 0 notifications since meetings/chats/announcements are disabled for them.
     setNotifications(getUserNotifications({ role, email, limit: 25 }));
   };
 
@@ -62,7 +47,10 @@ const Topbar = () => {
 
     return () => {
       window.removeEventListener("storage", onStorage);
-      window.removeEventListener("ems:notifications:updated", loadNotifications);
+      window.removeEventListener(
+        "ems:notifications:updated",
+        loadNotifications,
+      );
     };
   }, [role, email]);
 
@@ -92,13 +80,9 @@ const Topbar = () => {
       notificationId: notification.id,
     });
 
-    const route = getRouteForNotification(role, notification.type);
     setIsOpen(false);
     loadNotifications();
-
-    if (route) {
-      navigate(route);
-    }
+    // No routing needed for admin as they don't have personal notification destinations
   };
 
   return (

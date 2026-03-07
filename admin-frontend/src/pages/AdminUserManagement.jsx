@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 
-import UserModal from "../../components/admin/UserModal";
+import UserModal from "../components/UserModal";
 
 import { MoreVertical, Plus, AlertCircle, Loader } from "lucide-react";
-import { tasksApi, submissionsApi } from "../../utils/api";
+import { tasksApi, submissionsApi } from "../utils/api";
 
 /**
  * Comprehensive user management interface for the Admin panel.

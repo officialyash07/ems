@@ -7,7 +7,7 @@ import {
   AlertCircle,
   Loader,
 } from "lucide-react";
-import { tasksApi, submissionsApi } from "../../utils/api";
+import { tasksApi, submissionsApi } from "../utils/api";
 
 /**
  * Main dashboard component for the Admin panel.
