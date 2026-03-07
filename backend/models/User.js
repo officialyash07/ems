@@ -19,6 +19,23 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String
   },
+  authProvider: {
+    type: String,
+    enum: ['local'],
+    default: 'local'
+  },
+  isEmailVerified: {
+    type: Boolean,
+    default: false
+  },
+  emailVerificationTokenHash: {
+    type: String,
+    default: null
+  },
+  emailVerificationExpiresAt: {
+    type: Date,
+    default: null
+  },
   departmentId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Department'

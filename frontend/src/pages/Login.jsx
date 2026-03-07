@@ -91,12 +91,23 @@ const Login = () => {
           password: "password123",
         });
       } catch {
-        await authApi.register({
+        const registerResponse = await authApi.register({
           email: quickUser.email,
           password: "password123",
+          confirmPassword: "password123",
           role: quickUser.role,
           name: quickUser.name,
         });
+
+        if (registerResponse?.requiresEmailVerification) {
+          if (!registerResponse.verificationToken) {
+            throw new Error(
+              "Email verification is required. Ask an admin for your verification link.",
+            );
+          }
+
+          await authApi.verifyEmail({ token: registerResponse.verificationToken });
+        }
 
         response = await authApi.login({
           email: quickUser.email,

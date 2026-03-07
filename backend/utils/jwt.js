@@ -31,8 +31,26 @@ const extractBearerToken = (authorizationHeader = '') => {
 	return token;
 };
 
+const extractCookieToken = (
+	cookieHeader = '',
+	cookieName = process.env.AUTH_COOKIE_NAME || 'owms_auth_token'
+) => {
+	if (!cookieHeader || !cookieName) return null;
+
+	const cookies = cookieHeader.split(';');
+	for (const cookie of cookies) {
+		const [rawName, ...valueParts] = cookie.trim().split('=');
+		if (rawName !== cookieName) continue;
+		const cookieValue = valueParts.join('=');
+		return cookieValue ? decodeURIComponent(cookieValue) : null;
+	}
+
+	return null;
+};
+
 module.exports = {
 	signAccessToken,
 	verifyAccessToken,
-	extractBearerToken
+	extractBearerToken,
+	extractCookieToken
 };
