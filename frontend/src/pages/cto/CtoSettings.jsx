@@ -3,7 +3,7 @@ import { User, Upload, Mail, Lock, Bell, Trash2 } from "lucide-react";
 
 /**
  * User profile and security configuration portal for the CTO.
- * Manages administrative credentials, contact details, and notification preferences.
+ * Manages personal credentials, contact details, and notification preferences.
  */
 const CtoSettings = () => {
   const [form, setForm] = useState({

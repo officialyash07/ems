@@ -47,7 +47,10 @@ const toUserKey = ({ role, email }) => {
 
 const getReadMap = () => {
   if (typeof window === "undefined") return {};
-  const parsed = safeParse(localStorage.getItem(NOTIFICATION_READS_KEY) || "{}", {});
+  const parsed = safeParse(
+    localStorage.getItem(NOTIFICATION_READS_KEY) || "{}",
+    {},
+  );
   return typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
 };
 
@@ -64,11 +67,11 @@ const getReadIds = ({ role, email }) => {
 };
 
 const isMeetingsEnabledForRole = (role) => {
-  return true;
+  return role !== "admin";
 };
 
 const isChatEnabledForRole = (role) => {
-  return true;
+  return role !== "admin";
 };
 
 const buildMeetingNotifications = (role) => {
@@ -76,7 +79,10 @@ const buildMeetingNotifications = (role) => {
 
   return getArray(MEETINGS_STORAGE_KEY)
     .filter((meeting) => {
-      if (!Array.isArray(meeting?.targetRoles) || meeting.targetRoles.length === 0) {
+      if (
+        !Array.isArray(meeting?.targetRoles) ||
+        meeting.targetRoles.length === 0
+      ) {
         return false;
       }
 
@@ -86,7 +92,9 @@ const buildMeetingNotifications = (role) => {
       id: `meeting:${meeting.id}`,
       type: "meeting",
       title: "New meeting assigned",
-      message: meeting.datetime ? `${meeting.title} • ${meeting.datetime}` : meeting.title,
+      message: meeting.datetime
+        ? `${meeting.title} • ${meeting.datetime}`
+        : meeting.title,
       timestamp: parseTimestamp(meeting.createdAt, meeting.id),
     }));
 };
@@ -144,18 +152,26 @@ export const markNotificationAsRead = ({ role, email, notificationId }) => {
 
   const readMap = getReadMap();
   const userKey = toUserKey({ role, email });
-  const existing = new Set(Array.isArray(readMap[userKey]) ? readMap[userKey] : []);
+  const existing = new Set(
+    Array.isArray(readMap[userKey]) ? readMap[userKey] : [],
+  );
   existing.add(notificationId);
   readMap[userKey] = Array.from(existing);
   saveReadMap(readMap);
 };
 
-export const markAllNotificationsAsRead = ({ role, email, notificationIds = [] }) => {
+export const markAllNotificationsAsRead = ({
+  role,
+  email,
+  notificationIds = [],
+}) => {
   if (!role || notificationIds.length === 0) return;
 
   const readMap = getReadMap();
   const userKey = toUserKey({ role, email });
-  const existing = new Set(Array.isArray(readMap[userKey]) ? readMap[userKey] : []);
+  const existing = new Set(
+    Array.isArray(readMap[userKey]) ? readMap[userKey] : [],
+  );
 
   notificationIds.forEach((id) => existing.add(id));
 
