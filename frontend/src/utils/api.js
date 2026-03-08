@@ -16,6 +16,7 @@ export const apiFetch = async (endpoint, options = {}) => {
 
   const config = {
     method,
+    credentials: "include",
     ...rest,
   };
 
@@ -132,6 +133,15 @@ export const authApi = {
     apiFetch("/auth/login", {
       method: "POST",
       body: credentials,
+    }),
+  verifyEmail: (payload) =>
+    apiFetch("/auth/verify-email", {
+      method: "POST",
+      body: payload,
+    }),
+  logout: () =>
+    apiFetch("/auth/logout", {
+      method: "POST",
     }),
   me: () =>
     apiFetch("/auth/me", {

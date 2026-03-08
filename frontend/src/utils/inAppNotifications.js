@@ -64,11 +64,11 @@ const getReadIds = ({ role, email }) => {
 };
 
 const isMeetingsEnabledForRole = (role) => {
-  return role !== "admin";
+  return true;
 };
 
 const isChatEnabledForRole = (role) => {
-  return role !== "admin";
+  return true;
 };
 
 const buildMeetingNotifications = (role) => {

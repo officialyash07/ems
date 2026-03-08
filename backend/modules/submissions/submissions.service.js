@@ -35,8 +35,8 @@ exports.createSubmission = async ({ taskId, submittedById, externalLink, comment
   });
 
   const populated = await Submission.findById(submission._id)
-    .populate('submittedBy')
-    .populate('task');
+    .populate('submittedById')
+    .populate('taskId');
 
   console.log('[createSubmission] Submission created:', { id: submission._id, taskId: submission.taskId });
   return populated;
@@ -45,9 +45,9 @@ exports.createSubmission = async ({ taskId, submittedById, externalLink, comment
 exports.getByTask = async (taskId) => {
   try {
     const submissions = await Submission.find({ taskId })
-      .populate('submittedBy')
-      .populate('reviewedBy')
-      .populate('task')
+      .populate('submittedById')
+      .populate('reviewedById')
+      .populate('taskId')
       .sort({ createdAt: -1 })
       .lean();
     return submissions || [];
@@ -62,21 +62,21 @@ exports.getSubmissionHistory = async (taskId, submittedById) => {
     taskId,
     submittedById
   })
-    .populate('submittedBy')
-    .populate('reviewedBy')
-    .populate('task')
+    .populate('submittedById')
+    .populate('reviewedById')
+    .populate('taskId')
     .sort({ createdAt: -1 })
     .lean();
 };
 
 exports.getSubmissionById = async (id) => {
   const submission = await Submission.findById(id)
-    .populate('submittedBy')
-    .populate('reviewedBy')
+    .populate('submittedById')
+    .populate('reviewedById')
     .populate({
-      path: 'task',
+      path: 'taskId',
       populate: {
-        path: 'assignedTo assignedBy'
+        path: 'assignedToId assignedById'
       }
     })
     .lean();
@@ -116,9 +116,9 @@ exports.reviewSubmission = async (id, { reviewerId, status, reviewComment }) => 
     },
     { new: true }
   )
-    .populate('submittedBy')
-    .populate('reviewedBy')
-    .populate('task');
+    .populate('submittedById')
+    .populate('reviewedById')
+    .populate('taskId');
 
   console.log('[reviewSubmission] Successfully updated submission:', updated?._id);
   return updated;

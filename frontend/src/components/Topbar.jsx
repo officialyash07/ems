@@ -16,13 +16,13 @@ const WATCHED_STORAGE_KEYS = [
 ];
 
 const getMeetingsRoute = (role) => {
-  if (!role || role === "admin") return null;
+  if (!role) return null;
   if (role === "manager_intern") return "/manager_intern/intern-meetings";
   return `/${role}/meetings`;
 };
 
 const getChatRoute = (role) => {
-  if (!role || role === "admin") return null;
+  if (!role) return null;
   return `/${role}/chat`;
 };
 

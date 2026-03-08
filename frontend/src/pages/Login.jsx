@@ -26,7 +26,6 @@ const Login = () => {
       email: "manager_intern@owms.com",
       name: "Manager Intern User",
     },
-    { role: "admin", email: "admin@owms.com", name: "Admin User" },
     { role: "cto", email: "cto@owms.com", name: "CTO User" },
     { role: "cfo", email: "cfo@owms.com", name: "CFO User" },
     { role: "coo", email: "coo@owms.com", name: "COO User" },
@@ -34,7 +33,7 @@ const Login = () => {
   ];
 
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("admin@owms.com");
+  const [email, setEmail] = useState("intern@owms.com");
   const [password, setPassword] = useState("password123");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -91,12 +90,23 @@ const Login = () => {
           password: "password123",
         });
       } catch {
-        await authApi.register({
+        const registerResponse = await authApi.register({
           email: quickUser.email,
           password: "password123",
+          confirmPassword: "password123",
           role: quickUser.role,
           name: quickUser.name,
         });
+
+        if (registerResponse?.requiresEmailVerification) {
+          if (!registerResponse.verificationToken) {
+            throw new Error(
+              "Email verification is required. Ask an admin for your verification link.",
+            );
+          }
+
+          await authApi.verifyEmail({ token: registerResponse.verificationToken });
+        }
 
         response = await authApi.login({
           email: quickUser.email,
@@ -123,6 +133,14 @@ const Login = () => {
     if (role === "team_lead") return "Team Lead";
     if (role === "team_lead_intern") return "TL Intern";
     return role;
+  };
+
+  const isMeetingsEnabledForRole = (role) => {
+    return true;
+  };
+
+  const isChatEnabledForRole = (role) => {
+    return true;
   };
 
   return (

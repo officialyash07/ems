@@ -3,6 +3,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 
 import { MENU } from "../auth/menu";
 import { logout } from "../redux/authSlice";
+import { authApi } from "../utils/api";
 import { trackingApi } from "../utils/api";
 
 /**
@@ -23,10 +24,16 @@ const Sidebar = () => {
 
   const handleLogout = async () => {
     try {
-      await trackingApi.logLogout();
+      await authApi.logout();
+      // Log the logout event for tracking
+      try {
+        await trackingApi.logLogout();
+      } catch (error) {
+        console.warn("[tracking] logout event failed:", error.message);
+      }
     } catch (error) {
-      // Do not block logout if tracking call fails.
-      console.warn("[tracking] logout event failed:", error.message);
+      // Clear client auth state even if the server cookie is already invalid.
+      console.error("Failed to clear auth cookie:", error);
     } finally {
       dispatch(logout());
       navigate("/");
