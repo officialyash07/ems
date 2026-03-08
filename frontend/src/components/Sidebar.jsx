@@ -1,8 +1,9 @@
 import { useSelector, useDispatch } from "react-redux";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 import { MENU } from "../auth/menu";
 import { logout } from "../redux/authSlice";
+import { trackingApi } from "../utils/api";
 
 /**
  * Sidebar component that adapts the navigational menu based on the user's role.
@@ -10,6 +11,7 @@ import { logout } from "../redux/authSlice";
  */
 const Sidebar = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   // Pull relevant user information from global Redux auth state
   const { role, name, position, department_name } = useSelector(
@@ -18,6 +20,18 @@ const Sidebar = () => {
 
   // If role is undefined/null, do not render the sidebar (e.g. before login is complete)
   if (!role) return null;
+
+  const handleLogout = async () => {
+    try {
+      await trackingApi.logLogout();
+    } catch (error) {
+      // Do not block logout if tracking call fails.
+      console.warn("[tracking] logout event failed:", error.message);
+    } finally {
+      dispatch(logout());
+      navigate("/");
+    }
+  };
 
   return (
     <aside
@@ -62,7 +76,7 @@ const Sidebar = () => {
 
       {/* ---------------- LOGOUT BUTTON ---------------- */}
       <button
-        onClick={() => dispatch(logout())}
+        onClick={handleLogout}
         className="text-red-500 font-semibold py-4 w-full bg-transparent hover:bg-red-900/20 transition-colors duration-150 border-t border-[#2d3748] mt-auto cursor-pointer"
       >
         Log Out

@@ -11,7 +11,9 @@ exports.register = async (req, res) => {
 
 exports.login = async (req, res) => {
 	try {
-		const result = await authService.login(req.body);
+		const ipAddress = req.ip || req.connection.remoteAddress;
+		const userAgent = req.headers['user-agent'];
+		const result = await authService.login(req.body, ipAddress, userAgent);
 		return res.status(200).json(result);
 	} catch (error) {
 		return res.status(401).json({ error: error.message });

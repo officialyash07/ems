@@ -2,6 +2,8 @@ const bcrypt = require('bcryptjs');
 const User = require('../../models/User');
 const { signAccessToken } = require('../../utils/jwt');
 const { validateRegisterInput, validateLoginInput } = require('./auth.validation');
+const TimeLog = require('../../models/TimeLog');
+const { getISTTime } = require('../../utils/time');
 
 const toPublicUser = (user) => ({
 	id: user.id,
@@ -41,7 +43,7 @@ const register = async (payload) => {
 	return buildAuthResponse(user);
 };
 
-const login = async (payload) => {
+const login = async (payload, ipAddress, userAgent) => {
 	const { email, password } = validateLoginInput(payload);
 
 	const user = await User.findOne({ email });
@@ -49,6 +51,20 @@ const login = async (payload) => {
 
 	const isValidPassword = await bcrypt.compare(password, user.password);
 	if (!isValidPassword) throw new Error('Invalid email or password');
+
+	// Record login time
+	try {
+		await TimeLog.create({
+			userId: user._id,
+			loginTime: getISTTime(),
+			ipAddress,
+			userAgent,
+			isActive: true
+		});
+	} catch (error) {
+		console.error('[auth-service] Failed to record login time:', error.message);
+		// Don't fail the login if time tracking fails
+	}
 
 	return buildAuthResponse(user);
 };
