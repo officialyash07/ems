@@ -8,16 +8,17 @@ const timeLogSchema = new mongoose.Schema({
     required: true,
     index: true
   },
-  loginTime: {
-    type: Date,
+  userName: {
+    type: String,
+    required: true
+  },
+  userRole: {
+    type: String,
     required: true
   },
   loginTimeIST: {
-    type: String
-  },
-  logoutTime: {
-    type: Date,
-    default: null
+    type: String,
+    required: true
   },
   logoutTimeIST: {
     type: String,
@@ -37,36 +38,28 @@ const timeLogSchema = new mongoose.Schema({
   userAgent: {
     type: String
   },
-  createdAt: {
-    type: Date,
-    default: Date.now
-  },
   createdAtIST: {
-    type: String
+    type: String,
+    required: true
   }
 });
 
 // Calculate duration when logout time is set
 timeLogSchema.pre('save', function(next) {
-  if (this.loginTime) {
-    this.loginTimeIST = toISTISOString(this.loginTime);
-  }
-
-  if (this.logoutTime && this.loginTime) {
-    this.logoutTimeIST = toISTISOString(this.logoutTime);
-    this.duration = this.logoutTime - this.loginTime;
+  // When logging out, calculate duration based on IST timestamps
+  if (this.logoutTimeIST && this.loginTimeIST && !this.duration) {
+    const loginDate = new Date(this.loginTimeIST);
+    const logoutDate = new Date(this.logoutTimeIST);
+    this.duration = logoutDate - loginDate;
     this.isActive = false;
-  }
-
-  if (this.createdAt) {
-    this.createdAtIST = toISTISOString(this.createdAt);
   }
 
   next();
 });
 
 // Index for querying user sessions
-timeLogSchema.index({ userId: 1, loginTime: -1 });
+timeLogSchema.index({ userId: 1, loginTimeIST: -1 });
 timeLogSchema.index({ isActive: 1 });
+timeLogSchema.index({ userRole: 1 });
 
 module.exports = mongoose.model('TimeLog', timeLogSchema);

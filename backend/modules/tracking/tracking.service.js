@@ -48,28 +48,34 @@ const calculateScoreValue = ({
 // ==================== TIME TRACKING ====================
 
 const recordLogin = async (userId, ipAddress, userAgent) => {
+  const User = require('../../models/User');
+  const user = await User.findById(userId);
+  if (!user) throw new Error('User not found');
+
   const loginAt = getISTTime();
   return TimeLog.create({
     userId,
-    loginTime: loginAt,
+    userName: user.name,
+    userRole: user.role || 'intern',
     loginTimeIST: toISTISOString(loginAt),
     ipAddress,
     userAgent,
-    isActive: true
+    isActive: true,
+    createdAtIST: toISTISOString(loginAt)
   });
 };
 
 const recordLogout = async (userId) => {
-  const activeSession = await TimeLog.findOne({ userId, isActive: true }).sort({ loginTime: -1 });
+  const activeSession = await TimeLog.findOne({ userId, isActive: true }).sort({ loginTimeIST: -1 });
 
   if (!activeSession) {
     throw new Error('No active session found');
   }
 
   const logoutAt = getISTTime();
-  activeSession.logoutTime = logoutAt;
   activeSession.logoutTimeIST = toISTISOString(logoutAt);
-  activeSession.duration = logoutAt - activeSession.loginTime;
+  const loginDate = new Date(activeSession.loginTimeIST);
+  activeSession.duration = logoutAt - loginDate;
   activeSession.isActive = false;
 
   await activeSession.save();
@@ -77,20 +83,26 @@ const recordLogout = async (userId) => {
 };
 
 const getActiveSession = async (userId) => {
-  return TimeLog.findOne({ userId, isActive: true }).sort({ loginTime: -1 });
+  return TimeLog.findOne({ userId, isActive: true }).sort({ loginTimeIST: -1 });
 };
 
 const getTimeLogs = async (userId, filters = {}) => {
   const query = { userId };
 
   if (filters.startDate || filters.endDate) {
-    query.loginTime = {};
-    if (filters.startDate) query.loginTime.$gte = new Date(filters.startDate);
-    if (filters.endDate) query.loginTime.$lte = new Date(filters.endDate);
+    query.loginTimeIST = {};
+    if (filters.startDate) {
+      const startIST = toISTISOString(new Date(filters.startDate));
+      query.loginTimeIST.$gte = startIST;
+    }
+    if (filters.endDate) {
+      const endIST = toISTISOString(new Date(filters.endDate));
+      query.loginTimeIST.$lte = endIST;
+    }
   }
 
   const logs = await TimeLog.find(query)
-    .sort({ loginTime: -1 })
+    .sort({ loginTimeIST: -1 })
     .limit(toSafeLimit(filters.limit));
 
   const totalDuration = logs.reduce((sum, log) => sum + (log.duration || 0), 0);
@@ -209,13 +221,23 @@ const calculateProductivityScore = async (userId, date = null) => {
 
   const timeLogs = await TimeLog.find({
     userId,
-    loginTime: { $gte: startOfDay, $lte: endOfDay }
+    loginTimeIST: { 
+      $gte: toISTISOString(startOfDay), 
+      $lte: toISTISOString(endOfDay) 
+    }
   });
 
   const now = getISTTime();
   const totalActiveTime = timeLogs.reduce((sum, log) => {
-    if (log.logoutTime) return sum + (log.logoutTime - log.loginTime);
-    if (log.isActive) return sum + (now - log.loginTime);
+    if (log.logoutTimeIST) {
+      const loginDate = new Date(log.loginTimeIST);
+      const logoutDate = new Date(log.logoutTimeIST);
+      return sum + (logoutDate - loginDate);
+    }
+    if (log.isActive) {
+      const loginDate = new Date(log.loginTimeIST);
+      return sum + (now - loginDate);
+    }
     return sum;
   }, 0);
 

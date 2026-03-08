@@ -14,8 +14,8 @@ const logout = async (req, res, next) => {
     res.json({
       message: 'Logout recorded successfully',
       session: {
-        loginTime: session.loginTime,
-        logoutTime: session.logoutTime,
+        loginTimeIST: session.loginTimeIST,
+        logoutTimeIST: session.logoutTimeIST,
         duration: session.duration,
         durationHours: (session.duration / (1000 * 60 * 60)).toFixed(2)
       }
@@ -60,14 +60,14 @@ const getActiveSession = async (req, res, next) => {
       return res.json({ activeSession: null, isActive: false });
     }
     
-    const currentDuration = getISTTime() - session.loginTime;
+    const loginDate = new Date(session.loginTimeIST);
+    const currentDuration = getISTTime() - loginDate;
     
     res.json({
       activeSession: {
         ...session.toObject(),
         currentDuration,
-        currentDurationHours: (currentDuration / (1000 * 60 * 60)).toFixed(2),
-        loginTimeIST: formatISTDate(session.loginTime)
+        currentDurationHours: (currentDuration / (1000 * 60 * 60)).toFixed(2)
       },
       isActive: true
     });

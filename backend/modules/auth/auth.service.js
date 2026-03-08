@@ -107,12 +107,17 @@ const login = async (payload, ipAddress, userAgent) => {
 
 	// Record login time
 	try {
+		const loginAt = getISTTime();
+		const { toISTISOString } = require('../../utils/time');
 		await TimeLog.create({
 			userId: user._id,
-			loginTime: getISTTime(),
+			userName: user.name,
+			userRole: user.role || 'intern',
+			loginTimeIST: toISTISOString(loginAt),
 			ipAddress,
 			userAgent,
-			isActive: true
+			isActive: true,
+			createdAtIST: toISTISOString(loginAt)
 		});
 	} catch (error) {
 		console.error('[auth-service] Failed to record login time:', error.message);
