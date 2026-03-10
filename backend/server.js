@@ -1,21 +1,25 @@
-const app = require("./app");
-const { connectDB } = require("./config/db");
-
+// Load environment variables FIRST!
 require('dotenv').config();
 
+const { connectDB } = require("./config/db");
 
 const PORT = process.env.PORT || 5000;
 
 // Start server only when run directly (local dev / container).
 if (require.main === module) {
+  // Connect to database FIRST, then load app
   connectDB().then(() => {
+    // Load app AFTER database connection is established
+    const app = require("./app");
+    
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
     });
   }).catch((error) => {
     console.error('Failed to connect to database:', error);
     process.exit(1);
-  });}
-
-// Export app for serverless platforms (Vercel) and tests
-module.exports = app;
+  });
+} else {
+  // For testing/serverless, export app directly
+  module.exports = require("./app");
+}
