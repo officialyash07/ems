@@ -1,9 +1,10 @@
 import { useSelector, useDispatch } from "react-redux";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 import { MENU } from "../auth/menu";
 import { logout } from "../redux/authSlice";
 import { authApi } from "../utils/api";
+import { trackingApi } from "../utils/api";
 
 /**
  * Sidebar component that adapts the navigational menu based on the user's role.
@@ -11,17 +12,7 @@ import { authApi } from "../utils/api";
  */
 const Sidebar = () => {
   const dispatch = useDispatch();
-
-  const handleLogout = async () => {
-    try {
-      await authApi.logout();
-    } catch (error) {
-      // Clear client auth state even if the server cookie is already invalid.
-      console.error("Failed to clear auth cookie:", error);
-    } finally {
-      dispatch(logout());
-    }
-  };
+  const navigate = useNavigate();
 
   // Pull relevant user information from global Redux auth state
   const { role, name, position, department_name } = useSelector(
@@ -30,6 +21,24 @@ const Sidebar = () => {
 
   // If role is undefined/null, do not render the sidebar (e.g. before login is complete)
   if (!role) return null;
+
+  const handleLogout = async () => {
+    try {
+      await authApi.logout();
+      // Log the logout event for tracking
+      try {
+        await trackingApi.logLogout();
+      } catch (error) {
+        console.warn("[tracking] logout event failed:", error.message);
+      }
+    } catch (error) {
+      // Clear client auth state even if the server cookie is already invalid.
+      console.error("Failed to clear auth cookie:", error);
+    } finally {
+      dispatch(logout());
+      navigate("/");
+    }
+  };
 
   return (
     <aside

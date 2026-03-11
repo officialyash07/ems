@@ -3,6 +3,8 @@ const crypto = require('crypto');
 const User = require('../../models/User');
 const { signAccessToken } = require('../../utils/jwt');
 const { validateRegisterInput, validateLoginInput, validateVerificationToken } = require('./auth.validation');
+const TimeLog = require('../../models/TimeLog');
+const { getISTTime } = require('../../utils/time');
 
 const VERIFICATION_TOKEN_TTL_MINUTES = Number(process.env.EMAIL_VERIFICATION_TOKEN_TTL_MINUTES || 30);
 
@@ -86,7 +88,7 @@ const register = async (payload) => {
 	};
 };
 
-const login = async (payload) => {
+const login = async (payload, ipAddress, userAgent) => {
 	const { email, password } = validateLoginInput(payload);
 
 	const user = await User.findOne({ email });
@@ -101,6 +103,25 @@ const login = async (payload) => {
 	const isEmailVerified = user.isEmailVerified !== false;
 	if (!isEmailVerified) {
 		throw new Error('Email is not verified. Please verify your email first.');
+	}
+
+	// Record login time
+	try {
+		const loginAt = getISTTime();
+		const { toISTISOString } = require('../../utils/time');
+		await TimeLog.create({
+			userId: user._id,
+			userName: user.name,
+			userRole: user.role || 'intern',
+			loginTimeIST: toISTISOString(loginAt),
+			ipAddress,
+			userAgent,
+			isActive: true,
+			createdAtIST: toISTISOString(loginAt)
+		});
+	} catch (error) {
+		console.error('[auth-service] Failed to record login time:', error.message);
+		// Don't fail the login if time tracking fails
 	}
 
 	return buildAuthResponse(user);

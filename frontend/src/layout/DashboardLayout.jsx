@@ -1,6 +1,7 @@
 import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
 import { Outlet } from "react-router-dom";
+import useActivityTracking from "../hooks/useActivityTracking";
 
 // Fixed dimensions used to offset the main content area
 const SIDEBAR_WIDTH = 256; // 64 * 4 (w-64)
@@ -12,6 +13,8 @@ const TOPBAR_HEIGHT = 56; // 14 * 4 (h-14)
  * <Outlet /> to render nested child route components within the main content area.
  */
 const DashboardLayout = () => {
+  useActivityTracking();
+
   return (
     <div>
       {/* Global Navigation Components */}

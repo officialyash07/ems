@@ -2,7 +2,7 @@ const express = require('express');
 const path = require('path');
 const app = express();
 
-// CORS middleware
+// CORS middleware with dynamic origin and proper headers
 app.use((req, res, next) => {
   const allowedOrigins = ['http://localhost:5173', 'http://localhost:5174'];
   const origin = req.headers.origin;
@@ -42,10 +42,12 @@ app.use('/uploads', (req, res, next) => {
 const taskRoutes = require('./modules/tasks/task.routes');
 const submissionsRoutes = require('./modules/submissions/submissions.routes');
 const authRoutes = require('./modules/auth/auth.routes');
+const trackingRoutes = require('./modules/tracking/tracking.routes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/submissions', submissionsRoutes);
+app.use('/api/tracking', trackingRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

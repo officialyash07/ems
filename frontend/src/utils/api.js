@@ -149,6 +149,54 @@ export const authApi = {
     }),
 };
 
+export const trackingApi = {
+  getTimeLogs: () =>
+    apiFetch("/tracking/time", {
+      method: "GET",
+    }),
+
+  logLogout: () =>
+    apiFetch("/tracking/time/logout", {
+      method: "POST",
+    }),
+
+  logPageActivity: (payload, extraOptions = {}) =>
+    apiFetch("/tracking/page-activity", {
+      method: "POST",
+      body: payload,
+      ...extraOptions,
+    }),
+
+  logIdleStart: () =>
+    apiFetch("/tracking/idle", {
+      method: "POST",
+      body: { status: "start" },
+    }),
+
+  logIdleEnd: (duration) =>
+    apiFetch("/tracking/idle", {
+      method: "POST",
+      body: { status: "end", duration },
+    }),
+
+  logFocusLoss: (pagePath) =>
+    apiFetch("/tracking/focus", {
+      method: "POST",
+      body: { status: "loss", pagePath },
+    }),
+
+  logFocusGain: (pagePath) =>
+    apiFetch("/tracking/focus", {
+      method: "POST",
+      body: { status: "gain", pagePath },
+    }),
+
+  getPageActivity: () =>
+    apiFetch("/tracking/page-activity", {
+      method: "GET",
+    }),
+};
+
 // Submissions API calls
 export const submissionsApi = {
   // Create a new submission (with file upload)
