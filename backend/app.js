@@ -2,7 +2,7 @@ const express = require('express');
 const path = require('path');
 const app = express();
 
-// CORS middleware
+// CORS middleware with dynamic origin and proper headers
 app.use((req, res, next) => {
   const allowedOrigins = ['http://localhost:5173', 'http://localhost:5174'];
   const origin = req.headers.origin;
