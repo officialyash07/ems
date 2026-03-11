@@ -97,7 +97,7 @@ const TlSubmissionsReview = () => {
 
       const reviewData = {
         reviewerId: currentUserId || "unknown",
-        status: statusMap[status],
+        status: statusMap[statusBadge],   // FIX: was referencing undefined 'status'
         reviewComment: feedback,
       };
 
@@ -106,10 +106,10 @@ const TlSubmissionsReview = () => {
       // Update local state
       setSubmissions((prev) =>
         prev.map((s) =>
-          s.id === active.id ? { ...s, statusBadge: status } : s,
+          s.id === active.id ? { ...s, statusBadge } : s,
         ),
       );
-      setActive((prev) => ({ ...prev, statusBadge: status }));
+      setActive((prev) => ({ ...prev, statusBadge }));
       setFeedback("");
       setError(null);
     } catch (err) {
@@ -148,9 +148,8 @@ const TlSubmissionsReview = () => {
               <button
                 key={s.id}
                 onClick={() => setActive(s)}
-                className={`w-full p-4 text-left hover:bg-slate-100 ${
-                  active?.id === s.id ? "bg-slate-100" : ""
-                }`}
+                className={`w-full p-4 text-left hover:bg-slate-100 ${active?.id === s.id ? "bg-slate-100" : ""
+                  }`}
               >
                 <p className="font-medium">{s.intern}</p>
                 <p className="text-sm text-slate-600">Task: {s.task}</p>

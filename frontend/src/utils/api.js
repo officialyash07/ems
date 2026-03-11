@@ -63,7 +63,7 @@ export const apiFetch = async (endpoint, options = {}) => {
       console.error(`[apiFetch] API Error Response:`, parsedError);
       throw new Error(
         parsedError?.error ||
-          `API error: ${response.status} ${response.statusText}`,
+        `API error: ${response.status} ${response.statusText}`,
       );
     }
 
@@ -236,6 +236,15 @@ export const submissionsApi = {
   delete: (id) =>
     apiFetch(`/submissions/${id}`, {
       method: "DELETE",
+    }),
+};
+
+// Users API calls
+export const usersApi = {
+  // Get all users, optionally filtered by role (e.g. 'intern', 'team_lead')
+  getByRole: (role) =>
+    apiFetch(`/auth/users${role ? `?role=${role}` : ''}`, {
+      method: 'GET',
     }),
 };
 
