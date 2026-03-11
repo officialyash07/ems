@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 
 import TaskCard from "../../components/intern/TaskCard";
 import { tasksApi } from "../../utils/api";
@@ -15,16 +16,17 @@ const TABS = [
  * Filters and displays tasks assigned to the current intern based on status.
  */
 const InternMyTasks = () => {
+  // Get the real logged-in user's ID from Redux auth state
+  const { id: currentUserId } = useSelector((state) => state.auth);
   const [activeTab, setActiveTab] = useState("all");
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const internId = "intern-1"; // TODO: Get from auth context
 
   // Fetch tasks assigned to this intern
   useEffect(() => {
-    fetchTasks();
-  }, []);
+    if (currentUserId) fetchTasks();
+  }, [currentUserId]);
 
   /**
    * Retrieves all tasks and localizes the set to those assigned to this intern.
@@ -35,9 +37,9 @@ const InternMyTasks = () => {
       setLoading(true);
       const allTasks = await tasksApi.getAll();
 
-      // Filter tasks assigned to this intern
+      // Filter tasks assigned to this logged-in intern using their real MongoDB ID
       const internTasks = allTasks.filter(
-        (task) => task.assignedToId === internId,
+        (task) => task.assignedToId === currentUserId,
       );
 
       // Map API response to component format
@@ -108,10 +110,9 @@ const InternMyTasks = () => {
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
             className={`flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition
-              ${
-                activeTab === tab.key
-                  ? "bg-white text-slate-900 shadow"
-                  : "text-slate-500 hover:text-slate-700"
+              ${activeTab === tab.key
+                ? "bg-white text-slate-900 shadow"
+                : "text-slate-500 hover:text-slate-700"
               }`}
           >
             {tab.label}

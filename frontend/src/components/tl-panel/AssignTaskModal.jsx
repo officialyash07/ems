@@ -1,99 +1,108 @@
-import { useState } from "react";
-
-// Real interns seeded in the database
-const interns = [
-  {
-    id: "intern-1",
-    name: "Sarah Jones",
-    avatar: "https://i.pravatar.cc/100?img=1",
-  },
-  {
-    id: "intern-2",
-    name: "David Lee",
-    avatar: "https://i.pravatar.cc/100?img=2",
-  },
-  {
-    id: "intern-3",
-    name: "Emily Chen",
-    avatar: "https://i.pravatar.cc/100?img=3",
-  },
-  {
-    id: "intern-4",
-    name: "Michael Brown",
-    avatar: "https://i.pravatar.cc/100?img=4",
-  },
-  {
-    id: "intern-5",
-    name: "Jessica Wilson",
-    avatar: "https://i.pravatar.cc/100?img=5",
-  },
-];
+import { useState, useEffect } from "react";
+import { usersApi } from "../../utils/api";
 
 /**
- * Modal used by team leads to assign new tasks to interns.
- * Provides fields for selecting an intern, task name, priority, status, and deadline.
+ * Modal used by team leads / managers to assign new tasks to users.
+ * Dynamically fetches real users from the backend by role.
  *
- * @param {function} onClose - Function to trigger the closing of the modal
- * @param {function} onSubmit - Function receiving the validated assigned task data
+ * @param {function} onClose      - Close the modal
+ * @param {function} onSubmit     - Callback with validated task data
+ * @param {string}   targetRole   - Role to fetch for the assignee list (default: "intern")
  */
-const AssignTaskModal = ({ onClose, onSubmit }) => {
+const AssignTaskModal = ({ onClose, onSubmit, targetRole = "intern" }) => {
+  const [users, setUsers] = useState([]);
+  const [loadingUsers, setLoadingUsers] = useState(true);
   const [form, setForm] = useState({
-    internId: "",
+    assigneeId: "",
     task: "",
+    description: "",
     priority: "medium",
     deadline: "",
     status: "pending",
   });
 
+  // Fetch real users from the backend on mount
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        setLoadingUsers(true);
+        const data = await usersApi.getByRole(targetRole);
+        setUsers(data);
+      } catch (err) {
+        console.error("Failed to fetch users:", err);
+        alert("Could not load user list. Please try again.");
+      } finally {
+        setLoadingUsers(false);
+      }
+    };
+    fetchUsers();
+  }, [targetRole]);
+
   /**
    * Validates required inputs and submits the newly assigned task.
-   * Triggers an alert if required fields are missing.
    */
   const handleSubmit = () => {
-    const intern = interns.find((i) => i.id === form.internId);
-    if (!intern || !form.task || !form.deadline) {
-      alert("Please fill in all fields");
+    const assignee = users.find((u) => u.id === form.assigneeId);
+    if (!assignee || !form.task || !form.deadline) {
+      alert("Please fill in all required fields");
       return;
     }
 
     onSubmit({
-      intern,
+      intern: assignee,   // Keep "intern" key for backward compat with addTask()
       task: form.task,
+      description: form.description || form.task,
       priority: form.priority,
       deadline: form.deadline,
       status: form.status,
     });
 
     setForm({
-      internId: "",
+      assigneeId: "",
       task: "",
+      description: "",
       priority: "medium",
       deadline: "",
       status: "pending",
     });
   };
 
+  const roleLabel = targetRole === "intern" ? "Intern" : "Team Lead";
+
   return (
     <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center">
       <div className="w-full max-w-lg rounded-xl bg-white p-6 space-y-4">
         <h2 className="text-lg font-semibold">Assign New Task</h2>
 
+        {/* Assignee selector */}
         <select
           className="w-full rounded border px-3 py-2"
-          onChange={(e) => setForm({ ...form, internId: e.target.value })}
+          value={form.assigneeId}
+          onChange={(e) => setForm({ ...form, assigneeId: e.target.value })}
+          disabled={loadingUsers}
         >
-          <option value="">Select Intern</option>
-          {interns.map((i) => (
-            <option key={i.id} value={i.id}>
-              {i.name}
+          <option value="">
+            {loadingUsers ? "Loading…" : `Select ${roleLabel}`}
+          </option>
+          {users.map((u) => (
+            <option key={u.id} value={u.id}>
+              {u.name} ({u.email})
             </option>
           ))}
         </select>
 
         <input
-          placeholder="Task name"
+          placeholder="Task name *"
           className="w-full rounded border px-3 py-2"
+          value={form.task}
           onChange={(e) => setForm({ ...form, task: e.target.value })}
+        />
+
+        <input
+          placeholder="Description (optional)"
+          className="w-full rounded border px-3 py-2"
+          value={form.description}
+          onChange={(e) => setForm({ ...form, description: e.target.value })}
         />
 
         <div className="grid grid-cols-2 gap-3">
@@ -121,6 +130,7 @@ const AssignTaskModal = ({ onClose, onSubmit }) => {
         <input
           type="date"
           className="w-full rounded border px-3 py-2"
+          value={form.deadline}
           onChange={(e) => setForm({ ...form, deadline: e.target.value })}
         />
 
@@ -133,7 +143,8 @@ const AssignTaskModal = ({ onClose, onSubmit }) => {
           </button>
           <button
             onClick={handleSubmit}
-            className="rounded bg-indigo-600 px-4 py-2 text-white cursor-pointer"
+            disabled={loadingUsers}
+            className="rounded bg-indigo-600 px-4 py-2 text-white cursor-pointer disabled:opacity-50"
           >
             Assign Task
           </button>

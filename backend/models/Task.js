@@ -12,7 +12,8 @@ const taskSchema = new mongoose.Schema({
   departmentId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Department',
-    required: true
+    required: false,   // Optional — not all users have a department assigned
+    default: null
   },
   assignedToId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -52,7 +53,7 @@ const taskSchema = new mongoose.Schema({
   }
 });
 
-taskSchema.pre('save', function(next) {
+taskSchema.pre('save', function (next) {
   this.updatedAt = Date.now();
   next();
 });
